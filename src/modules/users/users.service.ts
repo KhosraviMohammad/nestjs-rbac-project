@@ -5,7 +5,9 @@ import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: MainDatabaseService) {}
+  constructor(
+    private prisma: MainDatabaseService,
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
     // Check if email already exists
