@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from '@prisma/client';
 
 export class PaginationMeta {
   @ApiProperty({ example: 1, description: 'Current page number' })
@@ -22,8 +21,25 @@ export class PaginationMeta {
 }
 
 export class PaginatedUsersDto {
-  @ApiProperty({ type: [User], description: 'Array of users' })
-  data: User[];
+  @ApiProperty({ 
+    description: 'Array of users',
+    example: [
+      {
+        id: 1,
+        email: 'user@example.com',
+        username: 'username',
+        firstName: 'John',
+        lastName: 'Doe',
+        roleType: 'support',
+        isActive: true,
+        emailVerified: false,
+        emailVerifiedAt: null,
+        createdAt: '2024-01-15T10:30:00.000Z',
+        updatedAt: '2024-01-15T10:30:00.000Z'
+      }
+    ]
+  })
+  data: any[];
 
   @ApiProperty({ type: PaginationMeta, description: 'Pagination metadata' })
   meta: PaginationMeta;
