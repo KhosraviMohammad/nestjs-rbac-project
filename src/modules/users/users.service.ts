@@ -167,6 +167,16 @@ export class UsersService {
     });
   }
 
+  async updateEmailVerification(userId: number, verified: boolean) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        emailVerified: verified,
+        emailVerifiedAt: verified ? new Date() : null,
+      },
+    });
+  }
+
   async lockUser(id: number) {
     const user = await this.findById(id);
     
