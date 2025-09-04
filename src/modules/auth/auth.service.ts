@@ -12,8 +12,8 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<any> {
-    const user = await this.usersService.findByEmail(email);
+  async validateUser(username: string, password: string): Promise<any> {
+    const user = await this.usersService.findByUsername(username);
     if (user && (await bcrypt.compare(password, user.password))) {
       const { password, ...result } = user;
       return result;
@@ -22,13 +22,13 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto) {
-    const user = await this.validateUser(loginDto.email, loginDto.password);
+    const user = await this.validateUser(loginDto.username, loginDto.password);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
     const payload = {
-      email: user.email,
+      username: user.username,
       sub: user.id,
       roles: user.roles.map((userRole) => userRole.role.name),
     };
@@ -37,7 +37,6 @@ export class AuthService {
       access_token: this.jwtService.sign(payload),
       user: {
         id: user.id,
-        email: user.email,
         username: user.username,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -51,9 +50,9 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto) {
-    const existingUser = await this.usersService.findByEmail(registerDto.email);
+    const existingUser = await this.usersService.findByUsername(registerDto.username);
     if (existingUser) {
-      throw new UnauthorizedException('User with this email already exists');
+      throw new UnauthorizedException('User with this username already exists');
     }
 
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);

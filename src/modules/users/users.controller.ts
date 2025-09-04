@@ -65,7 +65,6 @@ export class UsersController {
         userAgent: req.headers['user-agent'] || 'unknown',
         success: true,
         inputData: { 
-          email: createUserDto.email, 
           username: createUserDto.username,
           firstName: createUserDto.firstName,
           lastName: createUserDto.lastName,
@@ -91,7 +90,6 @@ export class UsersController {
         userAgent: req.headers['user-agent'] || 'unknown',
         success: false,
         inputData: { 
-          email: createUserDto.email, 
           username: createUserDto.username,
           firstName: createUserDto.firstName,
           lastName: createUserDto.lastName,

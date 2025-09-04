@@ -155,10 +155,9 @@ async function main() {
   const hashedPassword = await bcrypt.hash('password123', 10);
 
   const adminUser = await prisma.user.upsert({
-    where: { email: 'admin@example.com' },
+    where: { username: 'admin' },
     update: {},
     create: {
-      email: 'admin@example.com',
       username: 'admin',
       password: hashedPassword,
       firstName: 'Admin',
@@ -167,10 +166,9 @@ async function main() {
   });
 
   const moderatorUser = await prisma.user.upsert({
-    where: { email: 'moderator@example.com' },
+    where: { username: 'moderator' },
     update: {},
     create: {
-      email: 'moderator@example.com',
       username: 'moderator',
       password: hashedPassword,
       firstName: 'Moderator',
@@ -179,10 +177,9 @@ async function main() {
   });
 
   const regularUser = await prisma.user.upsert({
-    where: { email: 'user@example.com' },
+    where: { username: 'user' },
     update: {},
     create: {
-      email: 'user@example.com',
       username: 'user',
       password: hashedPassword,
       firstName: 'Regular',
@@ -241,9 +238,9 @@ async function main() {
 
   console.log('🎉 Database seeding completed successfully!');
   console.log('\n📋 Test Accounts:');
-  console.log('Admin: admin@example.com / password123');
-  console.log('Moderator: moderator@example.com / password123');
-  console.log('User: user@example.com / password123');
+  console.log('Admin: admin / password123');
+  console.log('Moderator: moderator / password123');
+  console.log('User: user / password123');
 }
 
 main()

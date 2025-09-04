@@ -34,7 +34,7 @@ export class AuthController {
         ipAddress: req.ip || 'unknown',
         userAgent: req.headers['user-agent'] || 'unknown',
         success: true,
-        inputData: { email: loginDto.email },
+        inputData: { username: loginDto.username },
         outputData: { userId: result.user.id, accessToken: '[REDACTED]' },
         duration: Date.now() - startTime,
       });
@@ -52,7 +52,7 @@ export class AuthController {
         ipAddress: req.ip || 'unknown',
         userAgent: req.headers['user-agent'] || 'unknown',
         success: false,
-        inputData: { email: loginDto.email },
+        inputData: { username: loginDto.username },
         errorMessage: error.message,
         errorCode: error.status?.toString() || '401',
         duration: Date.now() - startTime,
@@ -83,7 +83,6 @@ export class AuthController {
         userAgent: req.headers['user-agent'] || 'unknown',
         success: true,
         inputData: { 
-          email: registerDto.email, 
           username: registerDto.username,
           firstName: registerDto.firstName,
           lastName: registerDto.lastName 
@@ -108,7 +107,6 @@ export class AuthController {
         userAgent: req.headers['user-agent'] || 'unknown',
         success: false,
         inputData: { 
-          email: registerDto.email, 
           username: registerDto.username,
           firstName: registerDto.firstName,
           lastName: registerDto.lastName 
