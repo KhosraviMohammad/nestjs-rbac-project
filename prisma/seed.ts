@@ -73,21 +73,12 @@ async function main() {
     },
   });
 
-  const moderatorRole = await prisma.role.upsert({
-    where: { name: 'moderator' },
+  const supportRole = await prisma.role.upsert({
+    where: { name: 'support' },
     update: {},
     create: {
-      name: 'moderator',
-      description: 'Moderator with limited admin access',
-    },
-  });
-
-  const userRole = await prisma.role.upsert({
-    where: { name: 'user' },
-    update: {},
-    create: {
-      name: 'user',
-      description: 'Regular user with basic access',
+      name: 'support',
+      description: 'Support staff with limited access',
     },
   });
 
@@ -111,39 +102,21 @@ async function main() {
     });
   }
 
-  // Moderator gets no permissions (since posts are removed)
-  const moderatorPermissions: any[] = [];
-  for (const permission of moderatorPermissions) {
-    await prisma.rolePermission.upsert({
-      where: {
-        roleId_permissionId: {
-          roleId: moderatorRole.id,
-          permissionId: permission.id,
-        },
-      },
-      update: {},
-      create: {
-        roleId: moderatorRole.id,
-        permissionId: permission.id,
-      },
-    });
-  }
-
-  // User gets basic permissions
-  const userPermissions = permissions.filter(
-    (p) => p.name === 'users:read'
+  // Support gets limited permissions (read only)
+  const supportPermissions = permissions.filter(
+    (p) => p.name === 'users:read' || p.name === 'roles:read'
   );
-  for (const permission of userPermissions) {
+  for (const permission of supportPermissions) {
     await prisma.rolePermission.upsert({
       where: {
         roleId_permissionId: {
-          roleId: userRole.id,
+          roleId: supportRole.id,
           permissionId: permission.id,
         },
       },
       update: {},
       create: {
-        roleId: userRole.id,
+        roleId: supportRole.id,
         permissionId: permission.id,
       },
     });
@@ -166,27 +139,15 @@ async function main() {
     },
   });
 
-  const moderatorUser = await prisma.user.upsert({
-    where: { username: 'moderator' },
+  const supportUser = await prisma.user.upsert({
+    where: { username: 'support' },
     update: {},
     create: {
-      email: 'moderator@example.com',
-      username: 'moderator',
+      email: 'support@example.com',
+      username: 'support',
       password: hashedPassword,
-      firstName: 'Moderator',
-      lastName: 'User',
-    },
-  });
-
-  const regularUser = await prisma.user.upsert({
-    where: { username: 'user' },
-    update: {},
-    create: {
-      email: 'user@example.com',
-      username: 'user',
-      password: hashedPassword,
-      firstName: 'Regular',
-      lastName: 'User',
+      firstName: 'Support',
+      lastName: 'Staff',
     },
   });
 
@@ -210,28 +171,14 @@ async function main() {
   await prisma.userRole.upsert({
     where: {
       userId_roleId: {
-        userId: moderatorUser.id,
-        roleId: moderatorRole.id,
+        userId: supportUser.id,
+        roleId: supportRole.id,
       },
     },
     update: {},
     create: {
-      userId: moderatorUser.id,
-      roleId: moderatorRole.id,
-    },
-  });
-
-  await prisma.userRole.upsert({
-    where: {
-      userId_roleId: {
-        userId: regularUser.id,
-        roleId: userRole.id,
-      },
-    },
-    update: {},
-    create: {
-      userId: regularUser.id,
-      roleId: userRole.id,
+      userId: supportUser.id,
+      roleId: supportRole.id,
     },
   });
 
@@ -242,8 +189,7 @@ async function main() {
   console.log('🎉 Database seeding completed successfully!');
   console.log('\n📋 Test Accounts:');
   console.log('Admin: admin / password123');
-  console.log('Moderator: moderator / password123');
-  console.log('User: user / password123');
+  console.log('Support: support / password123');
 }
 
 main()

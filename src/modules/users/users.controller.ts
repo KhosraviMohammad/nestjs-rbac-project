@@ -31,11 +31,11 @@ export class UsersController {
   ) {}
 
   @Get()
-  @Roles('admin')
+  @Roles('admin', 'support')
   @Permissions('users:read')
-  @ApiOperation({ summary: 'Get all users (Admin only)' })
+  @ApiOperation({ summary: 'Get all users (Admin and Support)' })
   @ApiResponse({ status: 200, description: 'Users retrieved successfully' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Admin role required' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin or Support role required' })
   findAll() {
     return this.usersService.findAll();
   }
@@ -105,11 +105,11 @@ export class UsersController {
   }
 
   @Post(':id/lock')
-  @Roles('admin')
+  @Roles('admin', 'support')
   @Permissions('users:write')
-  @ApiOperation({ summary: 'Lock user account (Admin only)' })
+  @ApiOperation({ summary: 'Lock user account (Admin and Support)' })
   @ApiResponse({ status: 200, description: 'User account locked successfully' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Admin role required' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin or Support role required' })
   @ApiResponse({ status: 404, description: 'User not found' })
   async lockUser(@Param('id', ParseIntPipe) id: number, @Request() req) {
     const startTime = Date.now();
@@ -160,11 +160,11 @@ export class UsersController {
   }
 
   @Post(':id/unlock')
-  @Roles('admin')
+  @Roles('admin', 'support')
   @Permissions('users:write')
-  @ApiOperation({ summary: 'Unlock user account (Admin only)' })
+  @ApiOperation({ summary: 'Unlock user account (Admin and Support)' })
   @ApiResponse({ status: 200, description: 'User account unlocked successfully' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Admin role required' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin or Support role required' })
   @ApiResponse({ status: 404, description: 'User not found' })
   unlockUser(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.unlockUser(id);
