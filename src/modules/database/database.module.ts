@@ -8,6 +8,7 @@ import { AuditLogController } from './audit-log.controller';
 import { ActionLogController } from './action-log.controller';
 import { AuditLog, AuditLogSchema } from './schemas/audit-log.schema';
 import { ActionLog, ActionLogSchema } from './schemas/action-log.schema';
+import { AuditLogInterceptor } from '../../common/interceptors/audit-log.interceptor';
 
 @Global()
 @Module({
@@ -25,7 +26,7 @@ import { ActionLog, ActionLogSchema } from './schemas/action-log.schema';
     ]),
   ],
   controllers: [AuditLogController, ActionLogController],
-  providers: [MainDatabaseService, MongoDBService, AuditLogService, ActionLogService],
-  exports: [MainDatabaseService, MongoDBService, AuditLogService, ActionLogService],
+  providers: [MainDatabaseService, MongoDBService, AuditLogService, ActionLogService, AuditLogInterceptor],
+  exports: [MainDatabaseService, MongoDBService, AuditLogService, ActionLogService, AuditLogInterceptor],
 })
 export class DatabaseModule {}

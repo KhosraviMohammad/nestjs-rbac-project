@@ -74,11 +74,11 @@ export class AuthController {
       // Log successful registration action
       await this.actionLogService.log({
         actionType: 'register',
-        userId: result.user.id,
-        username: result.user.username,
-        firstName: result.user.firstName,
-        lastName: result.user.lastName,
-        userRole: result.user.roles?.[0]?.role?.name || 'user',
+        userId: result.id,
+        username: result.username,
+        firstName: result.firstName,
+        lastName: result.lastName,
+        userRole: result.roles?.[0]?.role?.name || 'user',
         ipAddress: req.ip || 'unknown',
         userAgent: req.headers['user-agent'] || 'unknown',
         success: true,
@@ -88,9 +88,9 @@ export class AuthController {
           firstName: registerDto.firstName,
           lastName: registerDto.lastName 
         },
-        outputData: { userId: result.user.id },
+        outputData: { userId: result.id },
         resourceType: 'user',
-        resourceId: result.user.id.toString(),
+        resourceId: result.id.toString(),
         duration: Date.now() - startTime,
       });
       
