@@ -83,7 +83,7 @@ export class AuthController {
         userAgent: req.headers['user-agent'] || 'unknown',
         success: true,
         inputData: { 
-          username: registerDto.username,
+          email: registerDto.email,
           firstName: registerDto.firstName,
           lastName: registerDto.lastName 
         },
@@ -107,7 +107,7 @@ export class AuthController {
         userAgent: req.headers['user-agent'] || 'unknown',
         success: false,
         inputData: { 
-          username: registerDto.username,
+          email: registerDto.email,
           firstName: registerDto.firstName,
           lastName: registerDto.lastName 
         },
