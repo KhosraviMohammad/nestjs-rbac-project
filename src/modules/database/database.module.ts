@@ -15,7 +15,7 @@ import { AuditLogInterceptor } from '../../common/interceptors/audit-log.interce
   imports: [
     MongooseModule.forRootAsync({
       useFactory: () => ({
-        uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/nestjs-rbac-audit',
+        uri: process.env.MONGODB_URI,
         useNewUrlParser: true,
         useUnifiedTopology: true,
       }),
