@@ -8,6 +8,7 @@ import {
   ParseIntPipe,
   UseGuards,
   Request,
+  Res,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from './users.service';
@@ -17,6 +18,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Audit } from '../../common/decorators/audit.decorator';
+import { CsvExportService } from './csv-export.service';
+import { Response } from 'express';
 
 @ApiTags('Admin - Users')
 @Controller('admin/users')
@@ -25,6 +28,7 @@ import { Audit } from '../../common/decorators/audit.decorator';
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
+    private readonly csvExportService: CsvExportService,
   ) {}
 
   @Get()
@@ -35,6 +39,23 @@ export class UsersController {
   @ApiResponse({ status: 403, description: 'Forbidden - Admin or Support role required' })
   findAll() {
     return this.usersService.findAll();
+  }
+
+  @Get('export/csv')
+  @Audit('export_users_csv')
+  @Roles('admin', 'support')
+  @ApiOperation({ summary: 'Export users to CSV (Admin and Support)' })
+  @ApiResponse({ status: 200, description: 'CSV file generated successfully' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin or Support role required' })
+  async exportUsersToCsv(@Res() res: Response) {
+    const users = await this.usersService.findAll();
+    const csvContent = await this.csvExportService.exportUsersToCsvStream(users);
+    
+    const filename = `users-export-${new Date().toISOString().split('T')[0]}.csv`;
+    
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(csvContent);
   }
 
   @Post()
