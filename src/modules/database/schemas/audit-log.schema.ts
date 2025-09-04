@@ -9,6 +9,9 @@ export class AuditLog {
   action: string;
 
   @Prop({ required: true })
+  actionType: string;
+
+  @Prop({ required: true })
   resource: string;
 
   @Prop({ required: true })
@@ -59,5 +62,6 @@ export const AuditLogSchema = SchemaFactory.createForClass(AuditLog);
 // Create indexes for better performance
 AuditLogSchema.index({ userId: 1, timestamp: -1 });
 AuditLogSchema.index({ action: 1, timestamp: -1 });
+AuditLogSchema.index({ actionType: 1, timestamp: -1 });
 AuditLogSchema.index({ resource: 1, resourceId: 1 });
 AuditLogSchema.index({ success: 1, timestamp: -1 });

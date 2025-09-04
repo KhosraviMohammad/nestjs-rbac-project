@@ -7,11 +7,16 @@ import {
 import { Observable } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
+import { Reflector } from '@nestjs/core';
 import { AuditLogService } from '../../modules/database/audit-log.service';
+import { AUDIT_KEY } from '../decorators/audit.decorator';
 
 @Injectable()
 export class AuditLogInterceptor implements NestInterceptor {
-  constructor(private readonly auditLogService: AuditLogService) {}
+  constructor(
+    private readonly auditLogService: AuditLogService,
+    private readonly reflector: Reflector,
+  ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
@@ -21,6 +26,11 @@ export class AuditLogInterceptor implements NestInterceptor {
     const { method, url, ip, headers } = request;
     const userAgent = headers['user-agent'] || 'Unknown';
     const user = request.user;
+
+    // Get action type from decorator
+    const actionType = this.reflector.get<string>(AUDIT_KEY, context.getHandler()) || 
+                      this.reflector.get<string>(AUDIT_KEY, context.getClass()) ||
+                      this.extractAction(method);
 
     // Extract resource and action from the request
     const resource = this.extractResource(url, method);
@@ -32,6 +42,7 @@ export class AuditLogInterceptor implements NestInterceptor {
         // Log successful request
         this.logAudit({
           action,
+          actionType,
           resource,
           resourceId,
           userId: user?.id || 0,
@@ -50,6 +61,7 @@ export class AuditLogInterceptor implements NestInterceptor {
         // Log failed request
         this.logAudit({
           action,
+          actionType,
           resource,
           resourceId,
           userId: user?.id || 0,
