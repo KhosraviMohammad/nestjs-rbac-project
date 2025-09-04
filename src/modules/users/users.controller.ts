@@ -9,11 +9,14 @@ import {
   UseGuards,
   Request,
   Res,
+  Query,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { ChangeRoleDto } from './dto/change-role.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { SearchUsersDto } from './dto/search-users.dto';
+import { PaginatedUsersDto } from './dto/paginated-users.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -34,24 +37,32 @@ export class UsersController {
   @Get()
   @Audit('get_all_users')
   @Roles('admin', 'support')
-  @ApiOperation({ summary: 'Get all users (Admin and Support)' })
-  @ApiResponse({ status: 200, description: 'Users retrieved successfully' })
+  @ApiOperation({ summary: 'Get all users with search, filter and pagination (Admin and Support)' })
+  @ApiResponse({ status: 200, description: 'Users retrieved successfully', type: PaginatedUsersDto })
   @ApiResponse({ status: 403, description: 'Forbidden - Admin or Support role required' })
-  findAll() {
-    return this.usersService.findAll();
+  findAll(@Query() searchParams: SearchUsersDto): Promise<PaginatedUsersDto> {
+    return this.usersService.findAll(searchParams);
   }
 
   @Get('export/csv')
   @Audit('export_users_csv')
   @Roles('admin', 'support')
-  @ApiOperation({ summary: 'Export users to CSV (Admin and Support)' })
+  @ApiOperation({ summary: 'Export users to CSV with search and filter (Admin and Support)' })
   @ApiResponse({ status: 200, description: 'CSV file generated successfully' })
   @ApiResponse({ status: 403, description: 'Forbidden - Admin or Support role required' })
-  async exportUsersToCsv(@Res() res: Response) {
-    const users = await this.usersService.findAll();
-    const csvContent = await this.csvExportService.exportUsersToCsvStream(users);
+  async exportUsersToCsv(@Query() searchParams: SearchUsersDto, @Res() res: Response) {
+    // For CSV export, we want all matching results, not paginated
+    const exportParams = { ...searchParams };
+    delete exportParams.page;
+    delete exportParams.limit;
     
-    const filename = `users-export-${new Date().toISOString().split('T')[0]}.csv`;
+    const result = await this.usersService.findAll(exportParams);
+    const csvContent = await this.csvExportService.exportUsersToCsvStream(result.data);
+    
+    // Create filename with filter info
+    const filterSuffix = searchParams.search ? `-search-${searchParams.search}` : '';
+    const roleSuffix = searchParams.roleType ? `-${searchParams.roleType}` : '';
+    const filename = `users-export${filterSuffix}${roleSuffix}-${new Date().toISOString().split('T')[0]}.csv`;
     
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
