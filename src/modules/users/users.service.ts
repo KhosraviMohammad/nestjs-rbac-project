@@ -104,15 +104,7 @@ export class UsersService {
       include: {
         roles: {
           include: {
-            role: {
-              include: {
-                permissions: {
-                  include: {
-                    permission: true,
-                  },
-                },
-              },
-            },
+            role: true,
           },
         },
       },
@@ -131,15 +123,7 @@ export class UsersService {
       include: {
         roles: {
           include: {
-            role: {
-              include: {
-                permissions: {
-                  include: {
-                    permission: true,
-                  },
-                },
-              },
-            },
+            role: true,
           },
         },
       },
@@ -152,15 +136,7 @@ export class UsersService {
       include: {
         roles: {
           include: {
-            role: {
-              include: {
-                permissions: {
-                  include: {
-                    permission: true,
-                  },
-                },
-              },
-            },
+            role: true,
           },
         },
       },

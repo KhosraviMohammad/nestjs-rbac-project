@@ -6,63 +6,6 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting database seeding...');
 
-  // Create permissions
-  const permissions = await Promise.all([
-    prisma.permission.upsert({
-      where: { name: 'users:read' },
-      update: {},
-      create: {
-        name: 'users:read',
-        description: 'Read users',
-        resource: 'users',
-        action: 'read',
-      },
-    }),
-    prisma.permission.upsert({
-      where: { name: 'users:write' },
-      update: {},
-      create: {
-        name: 'users:write',
-        description: 'Create and update users',
-        resource: 'users',
-        action: 'write',
-      },
-    }),
-    prisma.permission.upsert({
-      where: { name: 'users:delete' },
-      update: {},
-      create: {
-        name: 'users:delete',
-        description: 'Delete users',
-        resource: 'users',
-        action: 'delete',
-      },
-    }),
-
-    prisma.permission.upsert({
-      where: { name: 'roles:read' },
-      update: {},
-      create: {
-        name: 'roles:read',
-        description: 'Read roles',
-        resource: 'roles',
-        action: 'read',
-      },
-    }),
-    prisma.permission.upsert({
-      where: { name: 'roles:write' },
-      update: {},
-      create: {
-        name: 'roles:write',
-        description: 'Create and update roles',
-        resource: 'roles',
-        action: 'write',
-      },
-    }),
-  ]);
-
-  console.log('✅ Permissions created');
-
   // Create roles
   const adminRole = await prisma.role.upsert({
     where: { name: 'admin' },
@@ -83,46 +26,6 @@ async function main() {
   });
 
   console.log('✅ Roles created');
-
-  // Assign permissions to roles
-  // Admin gets all permissions
-  for (const permission of permissions) {
-    await prisma.rolePermission.upsert({
-      where: {
-        roleId_permissionId: {
-          roleId: adminRole.id,
-          permissionId: permission.id,
-        },
-      },
-      update: {},
-      create: {
-        roleId: adminRole.id,
-        permissionId: permission.id,
-      },
-    });
-  }
-
-  // Support gets limited permissions (read only)
-  const supportPermissions = permissions.filter(
-    (p) => p.name === 'users:read' || p.name === 'roles:read'
-  );
-  for (const permission of supportPermissions) {
-    await prisma.rolePermission.upsert({
-      where: {
-        roleId_permissionId: {
-          roleId: supportRole.id,
-          permissionId: permission.id,
-        },
-      },
-      update: {},
-      create: {
-        roleId: supportRole.id,
-        permissionId: permission.id,
-      },
-    });
-  }
-
-  console.log('✅ Role permissions assigned');
 
   // Create users
   const hashedPassword = await bcrypt.hash('password123', 10);
@@ -183,8 +86,6 @@ async function main() {
   });
 
   console.log('✅ User roles assigned');
-
-
 
   console.log('🎉 Database seeding completed successfully!');
   console.log('\n📋 Test Accounts:');

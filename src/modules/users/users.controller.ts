@@ -15,14 +15,12 @@ import { ChangeRoleDto } from './dto/change-role.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
-import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
-import { Permissions } from '../../common/decorators/permissions.decorator';
 import { ActionLogService } from '../database/action-log.service';
 
 @ApiTags('Admin - Users')
 @Controller('admin/users')
-@UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth('JWT-auth')
 export class UsersController {
   constructor(
@@ -32,7 +30,6 @@ export class UsersController {
 
   @Get()
   @Roles('admin', 'support')
-  @Permissions('users:read')
   @ApiOperation({ summary: 'Get all users (Admin and Support)' })
   @ApiResponse({ status: 200, description: 'Users retrieved successfully' })
   @ApiResponse({ status: 403, description: 'Forbidden - Admin or Support role required' })
@@ -42,7 +39,6 @@ export class UsersController {
 
   @Post()
   @Roles('admin')
-  @Permissions('users:write')
   @ApiOperation({ summary: 'Create a new user (Admin only)' })
   @ApiResponse({ status: 201, description: 'User created successfully' })
   @ApiResponse({ status: 400, description: 'Bad request - Invalid data' })
@@ -106,7 +102,6 @@ export class UsersController {
 
   @Post(':id/lock')
   @Roles('admin', 'support')
-  @Permissions('users:write')
   @ApiOperation({ summary: 'Lock user account (Admin and Support)' })
   @ApiResponse({ status: 200, description: 'User account locked successfully' })
   @ApiResponse({ status: 403, description: 'Forbidden - Admin or Support role required' })
@@ -161,7 +156,6 @@ export class UsersController {
 
   @Post(':id/unlock')
   @Roles('admin', 'support')
-  @Permissions('users:write')
   @ApiOperation({ summary: 'Unlock user account (Admin and Support)' })
   @ApiResponse({ status: 200, description: 'User account unlocked successfully' })
   @ApiResponse({ status: 403, description: 'Forbidden - Admin or Support role required' })
@@ -172,7 +166,6 @@ export class UsersController {
 
   @Patch(':id/role')
   @Roles('admin')
-  @Permissions('users:write')
   @ApiOperation({ summary: 'Change user role (Admin only)' })
   @ApiResponse({ status: 200, description: 'User role changed successfully' })
   @ApiResponse({ status: 403, description: 'Forbidden - Admin role required' })
