@@ -101,13 +101,6 @@ export class UsersService {
   async findById(id: number) {
     const user = await this.prisma.user.findUnique({
       where: { id },
-      include: {
-        roles: {
-          include: {
-            role: true,
-          },
-        },
-      },
     });
 
     if (!user) {
@@ -120,26 +113,12 @@ export class UsersService {
   async findByUsername(username: string) {
     return this.prisma.user.findUnique({
       where: { username },
-      include: {
-        roles: {
-          include: {
-            role: true,
-          },
-        },
-      },
     });
   }
 
   async findByEmail(email: string) {
     return this.prisma.user.findUnique({
       where: { email },
-      include: {
-        roles: {
-          include: {
-            role: true,
-          },
-        },
-      },
     });
   }
 
@@ -193,36 +172,21 @@ export class UsersService {
     });
   }
 
-  async changeUserRole(userId: number, roleName: string) {
+  async changeUserRole(userId: number, roleType: string) {
+    // Validate role type
+    if (!['admin', 'support'].includes(roleType)) {
+      throw new BadRequestException('Invalid role type. Must be "admin" or "support"');
+    }
+
     // Check if user exists
     await this.findById(userId);
 
-    // Check if role exists
-    const role = await this.prisma.role.findUnique({
-      where: { name: roleName },
-    });
-
-    if (!role) {
-      throw new NotFoundException(`Role '${roleName}' not found`);
-    }
-
-    // Remove all existing roles for the user
-    await this.prisma.userRole.deleteMany({
-      where: { userId },
-    });
-
-    // Assign the new role
-    const userRole = await this.prisma.userRole.create({
+    // Update user's role type
+    return this.prisma.user.update({
+      where: { id: userId },
       data: {
-        userId,
-        roleId: role.id,
-      },
-      include: {
-        role: true,
+        roleType: roleType,
       },
     });
-
-    // Return updated user with new role
-    return this.findById(userId);
   }
 }

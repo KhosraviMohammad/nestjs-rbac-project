@@ -31,7 +31,7 @@ export class AuthService {
     const payload = {
       username: user.username,
       sub: user.id,
-      roles: user.roles.map((userRole) => userRole.role.name),
+      roleType: user.roleType,
     };
 
     return {
@@ -41,11 +41,7 @@ export class AuthService {
         username: user.username,
         firstName: user.firstName,
         lastName: user.lastName,
-        roles: user.roles.map((userRole) => ({
-          id: userRole.role.id,
-          name: userRole.role.name,
-          description: userRole.role.description,
-        })),
+        roleType: user.roleType,
       },
     };
   }

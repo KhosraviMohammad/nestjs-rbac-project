@@ -1,9 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsIn } from 'class-validator';
 
 export class ChangeRoleDto {
-  @ApiProperty({ example: 'admin', description: 'Role name to assign to user' })
+  @ApiProperty({ example: 'admin', description: 'Role type to assign to user', enum: ['admin', 'support'] })
   @IsString()
   @IsNotEmpty()
-  role: string;
+  @IsIn(['admin', 'support'], { message: 'Role type must be either "admin" or "support"' })
+  roleType: string;
 }

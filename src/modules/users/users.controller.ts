@@ -83,6 +83,6 @@ export class UsersController {
     @Body() changeRoleDto: ChangeRoleDto,
     @Request() req,
   ) {
-    return this.usersService.changeUserRole(id, changeRoleDto.role);
+    return this.usersService.changeUserRole(id, changeRoleDto.roleType);
   }
 }

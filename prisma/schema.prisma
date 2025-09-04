@@ -17,39 +17,14 @@ model User {
   password          String
   firstName         String
   lastName          String
+  roleType          String   @default("support") // "admin" or "support"
   isActive          Boolean  @default(true)
   emailVerified     Boolean  @default(false)
   emailVerifiedAt   DateTime?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  // Relations
-  roles UserRole[]
-
   @@map("users")
-}
-
-model Role {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  description String?
-  users       UserRole[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@map("roles")
-}
-
-model UserRole {
-  id     Int @id @default(autoincrement())
-  userId Int
-  roleId Int
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, roleId])
-  @@map("user_roles")
 }
 
 

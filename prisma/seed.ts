@@ -6,27 +6,6 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting database seeding...');
 
-  // Create roles
-  const adminRole = await prisma.role.upsert({
-    where: { name: 'admin' },
-    update: {},
-    create: {
-      name: 'admin',
-      description: 'Administrator with full access',
-    },
-  });
-
-  const supportRole = await prisma.role.upsert({
-    where: { name: 'support' },
-    update: {},
-    create: {
-      name: 'support',
-      description: 'Support staff with limited access',
-    },
-  });
-
-  console.log('✅ Roles created');
-
   // Create users
   const hashedPassword = await bcrypt.hash('password123', 10);
 
@@ -39,6 +18,7 @@ async function main() {
       password: hashedPassword,
       firstName: 'Admin',
       lastName: 'User',
+      roleType: 'admin',
     },
   });
 
@@ -51,41 +31,11 @@ async function main() {
       password: hashedPassword,
       firstName: 'Support',
       lastName: 'Staff',
+      roleType: 'support',
     },
   });
 
   console.log('✅ Users created');
-
-  // Assign roles to users
-  await prisma.userRole.upsert({
-    where: {
-      userId_roleId: {
-        userId: adminUser.id,
-        roleId: adminRole.id,
-      },
-    },
-    update: {},
-    create: {
-      userId: adminUser.id,
-      roleId: adminRole.id,
-    },
-  });
-
-  await prisma.userRole.upsert({
-    where: {
-      userId_roleId: {
-        userId: supportUser.id,
-        roleId: supportRole.id,
-      },
-    },
-    update: {},
-    create: {
-      userId: supportUser.id,
-      roleId: supportRole.id,
-    },
-  });
-
-  console.log('✅ User roles assigned');
 
   console.log('🎉 Database seeding completed successfully!');
   console.log('\n📋 Test Accounts:');
