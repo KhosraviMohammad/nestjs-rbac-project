@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { MainDatabaseService } from '../database/database.service';
-import * as bcrypt from 'bcryptjs';
 import { CreateUserDto } from './dto/create-user.dto';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UsersService {
@@ -31,67 +31,23 @@ export class UsersService {
     // Hash password
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
-    // Create user
+    // Create user with roleType
     const user = await this.prisma.user.create({
       data: {
         email: createUserDto.email,
-        username: createUserDto.username, // Keep separate username field
+        username: createUserDto.username,
         password: hashedPassword,
         firstName: createUserDto.firstName,
         lastName: createUserDto.lastName,
-      },
-      include: {
-        roles: {
-          include: {
-            role: true,
-          },
-        },
+        roleType: createUserDto.role || 'support', // Use roleType instead of roles
       },
     });
 
-    // Assign default role if specified
-    if (createUserDto.role) {
-      const role = await this.prisma.role.findUnique({
-        where: { name: createUserDto.role },
-      });
-
-      if (role) {
-        await this.prisma.userRole.create({
-          data: {
-            userId: user.id,
-            roleId: role.id,
-          },
-        });
-      }
-    } else {
-      // Assign default 'user' role
-      const defaultRole = await this.prisma.role.findUnique({
-        where: { name: 'user' },
-      });
-
-      if (defaultRole) {
-        await this.prisma.userRole.create({
-          data: {
-            userId: user.id,
-            roleId: defaultRole.id,
-          },
-        });
-      }
-    }
-
-    // Return user with roles
-    return this.findById(user.id);
+    return user;
   }
 
   async findAll() {
     return this.prisma.user.findMany({
-      include: {
-        roles: {
-          include: {
-            role: true,
-          },
-        },
-      },
       orderBy: {
         createdAt: 'desc',
       },
@@ -136,18 +92,13 @@ export class UsersService {
     const user = await this.findById(id);
     
     if (!user.isActive) {
-      throw new BadRequestException('User account is already locked');
+      throw new BadRequestException('User is already locked');
     }
 
     return this.prisma.user.update({
       where: { id },
-      data: { isActive: false },
-      include: {
-        roles: {
-          include: {
-            role: true,
-          },
-        },
+      data: {
+        isActive: false,
       },
     });
   }
@@ -156,18 +107,13 @@ export class UsersService {
     const user = await this.findById(id);
     
     if (user.isActive) {
-      throw new BadRequestException('User account is already unlocked');
+      throw new BadRequestException('User is already unlocked');
     }
 
     return this.prisma.user.update({
       where: { id },
-      data: { isActive: true },
-      include: {
-        roles: {
-          include: {
-            role: true,
-          },
-        },
+      data: {
+        isActive: true,
       },
     });
   }

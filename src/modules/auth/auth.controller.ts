@@ -31,27 +31,7 @@ export class AuthController {
     return this.authService.register(registerDto);
   }
 
-  @Post('send-email-code')
-  @ApiOperation({ summary: 'Send email verification code' })
-  @ApiResponse({ status: 200, description: 'Verification code sent successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid email' })
-  async sendEmailCode(@Body() body: { email: string }) {
-    await this.authService.sendEmailVerification(body.email, 0); // userId will be 0 for unregistered users
-    return { message: 'Verification code sent to your email' };
-  }
-
-  @Post('verify-email-code')
-  @ApiOperation({ summary: 'Verify email verification code' })
-  @ApiResponse({ status: 200, description: 'Email verified successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid verification code' })
-  async verifyEmailCode(@Body() body: { email: string; code: string }) {
-    const isValid = await this.authService.verifyEmailCode(body.email, body.code);
-    if (!isValid) {
-      throw new BadRequestException('Invalid verification code');
-    }
-    return { message: 'Email verified successfully' };
-  }
-
+  
   @Get('profile')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
