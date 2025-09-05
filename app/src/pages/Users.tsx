@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
+import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import {
   Box,
   Typography,
@@ -29,83 +31,82 @@ import {
 import {
   Add as AddIcon,
   Edit as EditIcon,
-  Delete as DeleteIcon,
   Person as PersonIcon,
+  Lock as LockIcon,
+  LockOpen as LockOpenIcon,
 } from '@mui/icons-material'
+import { 
+  createUserSchema, 
+  updateUserSchema, 
+  changeRoleSchema, 
+  type CreateUserFormData, 
+  type UpdateUserFormData, 
+  type ChangeRoleFormData, 
+  UserRole, 
+  UserStatus 
+} from '../schemas'
+import { useUsers, useLockUser, useUnlockUser, useChangeUserRole } from '../hooks'
 
 interface User {
   id: number
   name: string
   email: string
   role: string
-  status: 'active' | 'inactive'
+  status: 'active' | 'inactive' | 'locked'
   createdAt: string
 }
 
 const Users: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([])
-  const [loading, setLoading] = useState(true)
   const [open, setOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    role: 'user',
-    status: 'active' as 'active' | 'inactive',
+  const [roleChangeUser, setRoleChangeUser] = useState<User | null>(null)
+
+  // React Query hooks
+  const { data: users = [], isLoading, error } = useUsers()
+  const lockUserMutation = useLockUser()
+  const unlockUserMutation = useUnlockUser()
+  const changeRoleMutation = useChangeUserRole()
+
+  // Forms
+  const createForm = useForm<CreateUserFormData>({
+    resolver: zodResolver(createUserSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      role: 'user',
+      status: 'active',
+    },
   })
 
-  // Mock data
-  useEffect(() => {
-    const mockUsers: User[] = [
-      {
-        id: 1,
-        name: 'John Doe',
-        email: 'john@example.com',
-        role: 'admin',
-        status: 'active',
-        createdAt: '2024-01-15',
-      },
-      {
-        id: 2,
-        name: 'Jane Smith',
-        email: 'jane@example.com',
-        role: 'user',
-        status: 'active',
-        createdAt: '2024-01-20',
-      },
-      {
-        id: 3,
-        name: 'Bob Johnson',
-        email: 'bob@example.com',
-        role: 'support',
-        status: 'inactive',
-        createdAt: '2024-01-25',
-      },
-    ]
-    
-    setTimeout(() => {
-      setUsers(mockUsers)
-      setLoading(false)
-    }, 1000)
-  }, [])
+  const updateForm = useForm<UpdateUserFormData>({
+    resolver: zodResolver(updateUserSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      role: 'user',
+      status: 'active',
+    },
+  })
+
+  const roleForm = useForm<ChangeRoleFormData>({
+    resolver: zodResolver(changeRoleSchema),
+    defaultValues: {
+      role: 'user',
+    },
+  })
 
   const handleOpen = (user?: User) => {
     if (user) {
       setEditingUser(user)
-      setFormData({
+      updateForm.reset({
         name: user.name,
         email: user.email,
-        role: user.role,
-        status: user.status,
+        role: user.role as UserRole,
+        status: user.status as UserStatus,
       })
     } else {
       setEditingUser(null)
-      setFormData({
-        name: '',
-        email: '',
-        role: 'user',
-        status: 'active',
-      })
+      createForm.reset()
     }
     setOpen(true)
   }
@@ -113,31 +114,42 @@ const Users: React.FC = () => {
   const handleClose = () => {
     setOpen(false)
     setEditingUser(null)
+    createForm.reset()
+    updateForm.reset()
   }
 
-  const handleSubmit = () => {
-    if (editingUser) {
-      // Update user
-      setUsers(users.map(user => 
-        user.id === editingUser.id 
-          ? { ...user, ...formData }
-          : user
-      ))
-    } else {
-      // Add new user
-      const newUser: User = {
-        id: Math.max(...users.map(u => u.id)) + 1,
-        ...formData,
-        createdAt: new Date().toISOString().split('T')[0],
+  const handleRoleChange = (user: User) => {
+    setRoleChangeUser(user)
+    roleForm.reset({ role: user.role as UserRole })
+  }
+
+  const handleRoleSubmit = async (data: ChangeRoleFormData) => {
+    if (roleChangeUser) {
+      try {
+        await changeRoleMutation.mutateAsync({
+          id: roleChangeUser.id.toString(),
+          role: data.role,
+        })
+        setRoleChangeUser(null)
+      } catch (error) {
+        console.error('Role change failed:', error)
       }
-      setUsers([...users, newUser])
     }
-    handleClose()
   }
 
-  const handleDelete = (id: number) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
-      setUsers(users.filter(user => user.id !== id))
+  const handleLock = async (id: number) => {
+    try {
+      await lockUserMutation.mutateAsync(id.toString())
+    } catch (error) {
+      console.error('Lock user failed:', error)
+    }
+  }
+
+  const handleUnlock = async (id: number) => {
+    try {
+      await unlockUserMutation.mutateAsync(id.toString())
+    } catch (error) {
+      console.error('Unlock user failed:', error)
     }
   }
 
@@ -150,10 +162,20 @@ const Users: React.FC = () => {
     }
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
         <CircularProgress />
+      </Box>
+    )
+  }
+
+  if (error) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+        <Alert severity="error">
+          Failed to load users. Please try again.
+        </Alert>
       </Box>
     )
   }
@@ -217,16 +239,37 @@ const Users: React.FC = () => {
                         size="small"
                         onClick={() => handleOpen(user)}
                         color="primary"
+                        title="Edit User"
                       >
                         <EditIcon />
                       </IconButton>
                       <IconButton
                         size="small"
-                        onClick={() => handleDelete(user.id)}
-                        color="error"
+                        onClick={() => handleRoleChange(user)}
+                        color="secondary"
+                        title="Change Role"
                       >
-                        <DeleteIcon />
+                        <PersonIcon />
                       </IconButton>
+                      {user.status === 'active' ? (
+                        <IconButton
+                          size="small"
+                          onClick={() => handleLock(user.id)}
+                          color="warning"
+                          title="Lock User"
+                        >
+                          <LockIcon />
+                        </IconButton>
+                      ) : (
+                        <IconButton
+                          size="small"
+                          onClick={() => handleUnlock(user.id)}
+                          color="success"
+                          title="Unlock User"
+                        >
+                          <LockOpenIcon />
+                        </IconButton>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -236,58 +279,204 @@ const Users: React.FC = () => {
         </CardContent>
       </Card>
 
+      {/* User Form Dialog */}
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
         <DialogTitle>
           {editingUser ? 'Edit User' : 'Add New User'}
         </DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 1 }}>
-            <TextField
-              fullWidth
-              label="Name"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              margin="normal"
-            />
-            <TextField
-              fullWidth
-              label="Email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              margin="normal"
-            />
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Role</InputLabel>
-              <Select
-                value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                label="Role"
-              >
-                <MenuItem value="user">User</MenuItem>
-                <MenuItem value="support">Support</MenuItem>
-                <MenuItem value="admin">Admin</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Status</InputLabel>
-              <Select
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value as 'active' | 'inactive' })}
-                label="Status"
-              >
-                <MenuItem value="active">Active</MenuItem>
-                <MenuItem value="inactive">Inactive</MenuItem>
-              </Select>
-            </FormControl>
+            {editingUser ? (
+              // Update Form
+              <form onSubmit={updateForm.handleSubmit(() => {})}>
+                <Controller
+                  name="name"
+                  control={updateForm.control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      label="Name"
+                      margin="normal"
+                      error={!!updateForm.formState.errors.name}
+                      helperText={updateForm.formState.errors.name?.message}
+                    />
+                  )}
+                />
+                <Controller
+                  name="email"
+                  control={updateForm.control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      label="Email"
+                      type="email"
+                      margin="normal"
+                      error={!!updateForm.formState.errors.email}
+                      helperText={updateForm.formState.errors.email?.message}
+                    />
+                  )}
+                />
+                <Controller
+                  name="role"
+                  control={updateForm.control}
+                  render={({ field }) => (
+                    <FormControl fullWidth margin="normal">
+                      <InputLabel>Role</InputLabel>
+                      <Select
+                        {...field}
+                        label="Role"
+                        error={!!updateForm.formState.errors.role}
+                      >
+                        <MenuItem value="user">User</MenuItem>
+                        <MenuItem value="support">Support</MenuItem>
+                        <MenuItem value="admin">Admin</MenuItem>
+                      </Select>
+                    </FormControl>
+                  )}
+                />
+                <Controller
+                  name="status"
+                  control={updateForm.control}
+                  render={({ field }) => (
+                    <FormControl fullWidth margin="normal">
+                      <InputLabel>Status</InputLabel>
+                      <Select
+                        {...field}
+                        label="Status"
+                        error={!!updateForm.formState.errors.status}
+                      >
+                        <MenuItem value="active">Active</MenuItem>
+                        <MenuItem value="inactive">Inactive</MenuItem>
+                        <MenuItem value="locked">Locked</MenuItem>
+                      </Select>
+                    </FormControl>
+                  )}
+                />
+              </form>
+            ) : (
+              // Create Form
+              <form onSubmit={createForm.handleSubmit(() => {})}>
+                <Controller
+                  name="name"
+                  control={createForm.control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      label="Name"
+                      margin="normal"
+                      error={!!createForm.formState.errors.name}
+                      helperText={createForm.formState.errors.name?.message}
+                    />
+                  )}
+                />
+                <Controller
+                  name="email"
+                  control={createForm.control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      label="Email"
+                      type="email"
+                      margin="normal"
+                      error={!!createForm.formState.errors.email}
+                      helperText={createForm.formState.errors.email?.message}
+                    />
+                  )}
+                />
+                <Controller
+                  name="role"
+                  control={createForm.control}
+                  render={({ field }) => (
+                    <FormControl fullWidth margin="normal">
+                      <InputLabel>Role</InputLabel>
+                      <Select
+                        {...field}
+                        label="Role"
+                        error={!!createForm.formState.errors.role}
+                      >
+                        <MenuItem value="user">User</MenuItem>
+                        <MenuItem value="support">Support</MenuItem>
+                        <MenuItem value="admin">Admin</MenuItem>
+                      </Select>
+                    </FormControl>
+                  )}
+                />
+                <Controller
+                  name="status"
+                  control={createForm.control}
+                  render={({ field }) => (
+                    <FormControl fullWidth margin="normal">
+                      <InputLabel>Status</InputLabel>
+                      <Select
+                        {...field}
+                        label="Status"
+                        error={!!createForm.formState.errors.status}
+                      >
+                        <MenuItem value="active">Active</MenuItem>
+                        <MenuItem value="inactive">Inactive</MenuItem>
+                        <MenuItem value="locked">Locked</MenuItem>
+                      </Select>
+                    </FormControl>
+                  )}
+                />
+              </form>
+            )}
           </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleSubmit} variant="contained">
+          <Button 
+            onClick={editingUser ? updateForm.handleSubmit(() => {}) : createForm.handleSubmit(() => {})} 
+            variant="contained"
+          >
             {editingUser ? 'Update' : 'Create'}
           </Button>
         </DialogActions>
+      </Dialog>
+
+      {/* Role Change Dialog */}
+      <Dialog open={!!roleChangeUser} onClose={() => setRoleChangeUser(null)} maxWidth="sm" fullWidth>
+        <form onSubmit={roleForm.handleSubmit(handleRoleSubmit)}>
+          <DialogTitle>
+            Change Role for {roleChangeUser?.name}
+          </DialogTitle>
+          <DialogContent>
+            <Box sx={{ pt: 1 }}>
+              <Controller
+                name="role"
+                control={roleForm.control}
+                render={({ field }) => (
+                  <FormControl fullWidth margin="normal">
+                    <InputLabel>Role</InputLabel>
+                    <Select
+                      {...field}
+                      label="Role"
+                      error={!!roleForm.formState.errors.role}
+                    >
+                      <MenuItem value="user">User</MenuItem>
+                      <MenuItem value="support">Support</MenuItem>
+                      <MenuItem value="admin">Admin</MenuItem>
+                    </Select>
+                  </FormControl>
+                )}
+              />
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setRoleChangeUser(null)}>Cancel</Button>
+            <Button 
+              type="submit" 
+              variant="contained"
+              disabled={changeRoleMutation.isPending}
+            >
+              {changeRoleMutation.isPending ? <CircularProgress size={20} /> : 'Change Role'}
+            </Button>
+          </DialogActions>
+        </form>
       </Dialog>
     </Box>
   )

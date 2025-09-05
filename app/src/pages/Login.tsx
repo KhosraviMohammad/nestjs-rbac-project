@@ -1,4 +1,6 @@
-import React, { useState } from 'react'
+import React from 'react'
+import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import {
   Box,
   Card,
@@ -11,40 +13,31 @@ import {
   CircularProgress,
 } from '@mui/material'
 import { Lock as LockIcon, Person as PersonIcon } from '@mui/icons-material'
+import { loginSchema, type LoginFormData } from '../schemas'
+import { useLogin } from '../hooks'
 
 const Login: React.FC = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+  const loginMutation = useLogin()
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
   })
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    })
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-
+  const onSubmit = async (data: LoginFormData) => {
     try {
-      // TODO: Implement actual login logic
-      console.log('Login attempt:', formData)
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // For now, just show success
-      alert('Login successful! (This is a demo)')
-    } catch (err) {
-      setError('Login failed. Please check your credentials.')
-    } finally {
-      setLoading(false)
+      await loginMutation.mutateAsync(data)
+      // Redirect or show success message
+      console.log('Login successful!')
+    } catch (error) {
+      console.error('Login failed:', error)
     }
   }
 
@@ -77,51 +70,68 @@ const Login: React.FC = () => {
               </Typography>
             </Box>
 
-            {error && (
+            {loginMutation.error && (
               <Alert severity="error" sx={{ mb: 2 }}>
-                {error}
+                {loginMutation.error.message || 'Login failed. Please check your credentials.'}
               </Alert>
             )}
 
-            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                label="Email Address"
+            <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 1 }}>
+              <Controller
                 name="email"
-                autoComplete="email"
-                autoFocus
-                value={formData.email}
-                onChange={handleChange}
-                InputProps={{
-                  startAdornment: <PersonIcon sx={{ mr: 1, color: 'action.active' }} />,
-                }}
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    margin="normal"
+                    fullWidth
+                    id="email"
+                    label="Email Address"
+                    autoComplete="email"
+                    autoFocus
+                    error={!!errors.email}
+                    helperText={errors.email?.message}
+                    InputProps={{
+                      startAdornment: <PersonIcon sx={{ mr: 1, color: 'action.active' }} />,
+                    }}
+                  />
+                )}
               />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
+              
+              <Controller
                 name="password"
-                label="Password"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-                value={formData.password}
-                onChange={handleChange}
-                InputProps={{
-                  startAdornment: <LockIcon sx={{ mr: 1, color: 'action.active' }} />,
-                }}
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    margin="normal"
+                    fullWidth
+                    name="password"
+                    label="Password"
+                    type="password"
+                    id="password"
+                    autoComplete="current-password"
+                    error={!!errors.password}
+                    helperText={errors.password?.message}
+                    InputProps={{
+                      startAdornment: <LockIcon sx={{ mr: 1, color: 'action.active' }} />,
+                    }}
+                  />
+                )}
               />
+              
               <Button
                 type="submit"
                 fullWidth
                 variant="contained"
                 sx={{ mt: 3, mb: 2 }}
-                disabled={loading}
+                disabled={isSubmitting || loginMutation.isPending}
               >
-                {loading ? <CircularProgress size={24} /> : 'Sign In'}
+                {isSubmitting || loginMutation.isPending ? (
+                  <CircularProgress size={24} />
+                ) : (
+                  'Sign In'
+                )}
               </Button>
             </Box>
 
