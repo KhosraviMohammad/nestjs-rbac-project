@@ -22,6 +22,9 @@ async function bootstrap() {
   // Global audit log interceptor
   app.useGlobalInterceptors(app.get(AuditLogInterceptor));
 
+  // Set global API prefix
+  app.setGlobalPrefix('api/v1');
+
   // Swagger configuration
   const config = new DocumentBuilder()
     .setTitle('NestJS RBAC API')
@@ -41,7 +44,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document, {
+  SwaggerModule.setup('api/v1/docs', app, document, {
     swaggerOptions: {
       persistAuthorization: true,
     },
@@ -51,7 +54,7 @@ async function bootstrap() {
   await app.listen(port);
   
   console.log(`🚀 Application is running on: http://localhost:${port}`);
-  console.log(`📚 Swagger documentation: http://localhost:${port}/api/docs`);
+  console.log(`📚 Swagger documentation: http://localhost:${port}/api/v1/docs`);
 }
 
 bootstrap();
