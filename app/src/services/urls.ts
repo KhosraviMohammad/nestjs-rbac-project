@@ -4,6 +4,7 @@ export const API_BASE_URL = 'http://localhost:3000/api/v1'
 // Authentication URLs
 export const AUTH_URLS = {
   LOGIN: '/auth/login',
+  REGISTER: '/auth/register',
 } as const
 
 // Users URLs

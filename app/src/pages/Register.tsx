@@ -13,33 +13,40 @@ import {
   CircularProgress,
   Link,
 } from '@mui/material'
-import { Lock as LockIcon, Person as PersonIcon } from '@mui/icons-material'
-import { loginSchema, type LoginFormData } from '../schemas'
-import { useLogin } from '../hooks'
+import { 
+  Lock as LockIcon, 
+  Person as PersonIcon, 
+  Email as EmailIcon,
+  PersonAdd as PersonAddIcon 
+} from '@mui/icons-material'
+import { registerSchema, type RegisterFormData } from '../schemas'
+import { useRegister } from '../hooks'
 import { Link as RouterLink } from 'react-router-dom'
 
-const Login: React.FC = () => {
-  const loginMutation = useLogin()
+const Register: React.FC = () => {
+  const registerMutation = useRegister()
 
   const {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
+      name: '',
       email: '',
       password: '',
+      confirmPassword: '',
     },
   })
 
-  const onSubmit = async (data: LoginFormData) => {
+  const onSubmit = async (data: RegisterFormData) => {
     try {
-      await loginMutation.mutateAsync(data)
+      await registerMutation.mutateAsync(data)
       // Redirect or show success message
-      console.log('Login successful!')
+      console.log('Registration successful!')
     } catch (error) {
-      console.error('Login failed:', error)
+      console.error('Registration failed:', error)
     }
   }
 
@@ -63,22 +70,43 @@ const Login: React.FC = () => {
                 mb: 3,
               }}
             >
-              <LockIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
+              <PersonAddIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
               <Typography component="h1" variant="h5">
-                Sign In
+                Create Account
               </Typography>
               <Typography variant="body2" color="text.secondary" align="center">
-                Enter your credentials to access the admin panel
+                Sign up to access the admin panel
               </Typography>
             </Box>
 
-            {loginMutation.error && (
+            {registerMutation.error && (
               <Alert severity="error" sx={{ mb: 2 }}>
-                {loginMutation.error.message || 'Login failed. Please check your credentials.'}
+                {registerMutation.error.message || 'Registration failed. Please try again.'}
               </Alert>
             )}
 
             <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 1 }}>
+              <Controller
+                name="name"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    margin="normal"
+                    fullWidth
+                    id="name"
+                    label="Full Name"
+                    autoComplete="name"
+                    autoFocus
+                    error={!!errors.name}
+                    helperText={errors.name?.message}
+                    InputProps={{
+                      startAdornment: <PersonIcon sx={{ mr: 1, color: 'action.active' }} />,
+                    }}
+                  />
+                )}
+              />
+
               <Controller
                 name="email"
                 control={control}
@@ -90,11 +118,10 @@ const Login: React.FC = () => {
                     id="email"
                     label="Email Address"
                     autoComplete="email"
-                    autoFocus
                     error={!!errors.email}
                     helperText={errors.email?.message}
                     InputProps={{
-                      startAdornment: <PersonIcon sx={{ mr: 1, color: 'action.active' }} />,
+                      startAdornment: <EmailIcon sx={{ mr: 1, color: 'action.active' }} />,
                     }}
                   />
                 )}
@@ -112,9 +139,31 @@ const Login: React.FC = () => {
                     label="Password"
                     type="password"
                     id="password"
-                    autoComplete="current-password"
+                    autoComplete="new-password"
                     error={!!errors.password}
                     helperText={errors.password?.message}
+                    InputProps={{
+                      startAdornment: <LockIcon sx={{ mr: 1, color: 'action.active' }} />,
+                    }}
+                  />
+                )}
+              />
+
+              <Controller
+                name="confirmPassword"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    margin="normal"
+                    fullWidth
+                    name="confirmPassword"
+                    label="Confirm Password"
+                    type="password"
+                    id="confirmPassword"
+                    autoComplete="new-password"
+                    error={!!errors.confirmPassword}
+                    helperText={errors.confirmPassword?.message}
                     InputProps={{
                       startAdornment: <LockIcon sx={{ mr: 1, color: 'action.active' }} />,
                     }}
@@ -127,34 +176,23 @@ const Login: React.FC = () => {
                 fullWidth
                 variant="contained"
                 sx={{ mt: 3, mb: 2 }}
-                disabled={isSubmitting || loginMutation.isPending}
+                disabled={isSubmitting || registerMutation.isPending}
               >
-                {isSubmitting || loginMutation.isPending ? (
+                {isSubmitting || registerMutation.isPending ? (
                   <CircularProgress size={24} />
                 ) : (
-                  'Sign In'
+                  'Create Account'
                 )}
               </Button>
             </Box>
 
             <Box sx={{ mt: 2, textAlign: 'center' }}>
               <Typography variant="body2" color="text.secondary">
-                Don't have an account?{' '}
-                <Link component={RouterLink} to="/register" variant="body2">
-                  Sign up here
+                Already have an account?{' '}
+                <Link component={RouterLink} to="/login" variant="body2">
+                  Sign in here
                 </Link>
               </Typography>
-              <Box sx={{ mt: 2 }}>
-                <Typography variant="body2" color="text.secondary">
-                  Demo Credentials:
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Email: admin@example.com
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Password: password123
-                </Typography>
-              </Box>
             </Box>
           </CardContent>
         </Card>
@@ -163,4 +201,4 @@ const Login: React.FC = () => {
   )
 }
 
-export default Login
+export default Register

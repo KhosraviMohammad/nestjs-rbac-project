@@ -16,3 +16,20 @@ export const useLogin = () => {
     },
   })
 }
+
+export const useRegister = () => {
+  return useMutation({
+    mutationFn: ({ name, email, password }: { name: string; email: string; password: string }) =>
+      authService.register(name, email, password),
+    onSuccess: (data) => {
+      // Store token in localStorage if registration returns a token
+      if (data.access_token) {
+        localStorage.setItem('authToken', data.access_token)
+      }
+      console.log('Registration successful!', data)
+    },
+    onError: (error) => {
+      console.error('Registration failed:', error)
+    },
+  })
+}
