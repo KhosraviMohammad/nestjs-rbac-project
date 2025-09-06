@@ -46,6 +46,7 @@ import {
   UserStatus 
 } from '../schemas'
 import { useUsers, useLockUser, useUnlockUser, useChangeUserRole } from '../hooks'
+import { toast } from 'react-toastify'
 
 interface User {
   id: number
@@ -130,9 +131,11 @@ const Users: React.FC = () => {
           id: roleChangeUser.id.toString(),
           role: data.role,
         })
+        toast.success('User role changed successfully!')
         setRoleChangeUser(null)
-      } catch (error) {
+      } catch (error: any) {
         console.error('Role change failed:', error)
+        toast.error(error?.response?.data?.message || 'Failed to change user role. Please try again.')
       }
     }
   }
@@ -140,16 +143,20 @@ const Users: React.FC = () => {
   const handleLock = async (id: number) => {
     try {
       await lockUserMutation.mutateAsync(id.toString())
-    } catch (error) {
+      toast.success('User locked successfully!')
+    } catch (error: any) {
       console.error('Lock user failed:', error)
+      toast.error(error?.response?.data?.message || 'Failed to lock user. Please try again.')
     }
   }
 
   const handleUnlock = async (id: number) => {
     try {
       await unlockUserMutation.mutateAsync(id.toString())
-    } catch (error) {
+      toast.success('User unlocked successfully!')
+    } catch (error: any) {
       console.error('Unlock user failed:', error)
+      toast.error(error?.response?.data?.message || 'Failed to unlock user. Please try again.')
     }
   }
 
@@ -210,7 +217,7 @@ const Users: React.FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {users.map((user) => (
+                {users.map((user: User) => (
                   <TableRow key={user.id}>
                     <TableCell>
                       <Box display="flex" alignItems="center">

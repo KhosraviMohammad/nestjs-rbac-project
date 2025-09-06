@@ -18,6 +18,7 @@ import { loginSchema, type LoginFormData } from '../schemas'
 import { useLogin } from '../hooks'
 import { Link as RouterLink } from 'react-router-dom'
 import { formatBackendError } from '../utils/errorHandler'
+import { toast } from 'react-toastify'
 
 const Login: React.FC = () => {
   const loginMutation = useLogin()
@@ -37,10 +38,12 @@ const Login: React.FC = () => {
   const onSubmit = async (data: LoginFormData) => {
     try {
       await loginMutation.mutateAsync(data)
+      toast.success('Login successful!')
       // Redirect or show success message
       console.log('Login successful!')
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login failed:', error)
+      toast.error(error?.response?.data?.message || 'Login failed. Please try again.')
     }
   }
 

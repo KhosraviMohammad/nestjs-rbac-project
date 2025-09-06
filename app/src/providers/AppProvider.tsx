@@ -2,6 +2,7 @@ import React from 'react'
 import { BrowserRouter } from 'react-router-dom'
 import QueryProvider from './QueryProvider'
 import ThemeProvider from './ThemeProvider'
+import ToastProvider from '../components/ToastProvider'
 
 interface AppProviderProps {
   children: React.ReactNode
@@ -13,6 +14,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       <BrowserRouter>
         <ThemeProvider>
           {children}
+          <ToastProvider />
         </ThemeProvider>
       </BrowserRouter>
     </QueryProvider>

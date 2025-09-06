@@ -23,6 +23,7 @@ import { registerSchema, type RegisterFormData } from '../schemas'
 import { useRegister } from '../hooks'
 import { Link as RouterLink } from 'react-router-dom'
 import { formatBackendError } from '../utils/errorHandler'
+import { toast } from 'react-toastify'
 
 const Register: React.FC = () => {
   const registerMutation = useRegister()
@@ -45,10 +46,12 @@ const Register: React.FC = () => {
   const onSubmit = async (data: RegisterFormData) => {
     try {
       await registerMutation.mutateAsync(data)
+      toast.success('Registration successful! Please check your email for verification.')
       // Redirect or show success message
       console.log('Registration successful!')
-    } catch (error) {
+    } catch (error: any) {
       console.error('Registration failed:', error)
+      toast.error(error?.response?.data?.message || 'Registration failed. Please try again.')
     }
   }
 
