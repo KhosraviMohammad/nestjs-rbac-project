@@ -25,7 +25,7 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const user = await this.validateUser(loginDto.username, loginDto.password);
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new BadRequestException('wrong username or password');
     }
 
     const payload = {
@@ -50,7 +50,7 @@ export class AuthService {
     // Check if user already exists by email field
     const existingUser = await this.usersService.findByEmail(registerDto.email);
     if (existingUser) {
-      throw new UnauthorizedException('User with this email already exists');
+      throw new BadRequestException('User with this email already exists');
     }
 
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);

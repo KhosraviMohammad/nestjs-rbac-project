@@ -17,7 +17,7 @@ export class AuthController {
   @Audit('user_login')
   @ApiOperation({ summary: 'User login' })
   @ApiResponse({ status: 200, description: 'Login successful' })
-  @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  @ApiResponse({ status: 400, description: 'wrong username or password' })
   async login(@Body() loginDto: LoginDto, @Request() req) {
     return this.authService.login(loginDto);
   }
@@ -26,7 +26,7 @@ export class AuthController {
   @Audit('user_registration')
   @ApiOperation({ summary: 'User registration' })
   @ApiResponse({ status: 201, description: 'User registered successfully' })
-  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 400, description: 'User with this email already exists' })
   async register(@Body() registerDto: RegisterDto, @Request() req) {
     return this.authService.register(registerDto);
   }
