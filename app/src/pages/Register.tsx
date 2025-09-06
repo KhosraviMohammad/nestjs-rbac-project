@@ -33,7 +33,8 @@ const Register: React.FC = () => {
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      name: '',
+      firstName: '',
+      lastName: '',
       email: '',
       password: '',
       confirmPassword: '',
@@ -87,19 +88,39 @@ const Register: React.FC = () => {
 
             <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 1 }}>
               <Controller
-                name="name"
+                name="firstName"
                 control={control}
                 render={({ field }) => (
                   <TextField
                     {...field}
                     margin="normal"
                     fullWidth
-                    id="name"
-                    label="Full Name"
-                    autoComplete="name"
+                    id="firstName"
+                    label="First Name"
+                    autoComplete="given-name"
                     autoFocus
-                    error={!!errors.name}
-                    helperText={errors.name?.message}
+                    error={!!errors.firstName}
+                    helperText={errors.firstName?.message}
+                    InputProps={{
+                      startAdornment: <PersonIcon sx={{ mr: 1, color: 'action.active' }} />,
+                    }}
+                  />
+                )}
+              />
+
+              <Controller
+                name="lastName"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    margin="normal"
+                    fullWidth
+                    id="lastName"
+                    label="Last Name"
+                    autoComplete="family-name"
+                    error={!!errors.lastName}
+                    helperText={errors.lastName?.message}
                     InputProps={{
                       startAdornment: <PersonIcon sx={{ mr: 1, color: 'action.active' }} />,
                     }}

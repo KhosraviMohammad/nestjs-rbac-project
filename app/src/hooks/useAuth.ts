@@ -19,8 +19,8 @@ export const useLogin = () => {
 
 export const useRegister = () => {
   return useMutation({
-    mutationFn: ({ name, email, password }: { name: string; email: string; password: string }) =>
-      authService.register(name, email, password),
+    mutationFn: ({ firstName, lastName, email, password }: { firstName: string; lastName: string; email: string; password: string }) =>
+      authService.register(firstName, lastName, email, password),
     onSuccess: (data) => {
       // Store token in localStorage if registration returns a token
       if (data.access_token) {
