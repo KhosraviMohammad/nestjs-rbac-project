@@ -17,6 +17,7 @@ import { Lock as LockIcon, Person as PersonIcon } from '@mui/icons-material'
 import { loginSchema, type LoginFormData } from '../schemas'
 import { useLogin } from '../hooks'
 import { Link as RouterLink } from 'react-router-dom'
+import { formatBackendError } from '../utils/errorHandler'
 
 const Login: React.FC = () => {
   const loginMutation = useLogin()
@@ -28,7 +29,7 @@ const Login: React.FC = () => {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
+      username: '',
       password: '',
     },
   })
@@ -74,25 +75,25 @@ const Login: React.FC = () => {
 
             {loginMutation.error && (
               <Alert severity="error" sx={{ mb: 2 }}>
-                {loginMutation.error.message || 'Login failed. Please check your credentials.'}
+                {formatBackendError(loginMutation.error)}
               </Alert>
             )}
 
             <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 1 }}>
               <Controller
-                name="email"
+                name="username"
                 control={control}
                 render={({ field }) => (
                   <TextField
                     {...field}
                     margin="normal"
                     fullWidth
-                    id="email"
-                    label="Email Address"
-                    autoComplete="email"
+                    id="username"
+                    label="Username"
+                    autoComplete="username"
                     autoFocus
-                    error={!!errors.email}
-                    helperText={errors.email?.message}
+                    error={!!errors.username}
+                    helperText={errors.username?.message}
                     InputProps={{
                       startAdornment: <PersonIcon sx={{ mr: 1, color: 'action.active' }} />,
                     }}
@@ -149,7 +150,7 @@ const Login: React.FC = () => {
                   Demo Credentials:
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Email: admin@example.com
+                  Username: admin@example.com
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Password: password123

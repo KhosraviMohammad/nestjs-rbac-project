@@ -22,6 +22,7 @@ import {
 import { registerSchema, type RegisterFormData } from '../schemas'
 import { useRegister } from '../hooks'
 import { Link as RouterLink } from 'react-router-dom'
+import { formatBackendError } from '../utils/errorHandler'
 
 const Register: React.FC = () => {
   const registerMutation = useRegister()
@@ -82,7 +83,7 @@ const Register: React.FC = () => {
 
             {registerMutation.error && (
               <Alert severity="error" sx={{ mb: 2 }}>
-                {registerMutation.error.message || 'Registration failed. Please try again.'}
+                {formatBackendError(registerMutation.error)}
               </Alert>
             )}
 

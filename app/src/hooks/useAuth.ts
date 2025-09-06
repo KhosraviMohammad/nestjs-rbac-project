@@ -3,8 +3,8 @@ import { authService } from '../services/auth.service'
 
 export const useLogin = () => {
   return useMutation({
-    mutationFn: ({ email, password }: { email: string; password: string }) =>
-      authService.login(email, password),
+    mutationFn: ({ username, password }: { username: string; password: string }) =>
+      authService.login(username, password),
     onSuccess: (data) => {
       // Store token in localStorage
       if (data.access_token) {

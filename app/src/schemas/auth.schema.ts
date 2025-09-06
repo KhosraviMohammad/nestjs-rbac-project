@@ -2,10 +2,10 @@ import { z } from 'zod'
 
 // Login Schema
 export const loginSchema = z.object({
-  email: z
+  username: z
     .string()
-    .min(1, 'Email is required')
-    .email('Please enter a valid email address'),
+    .min(1, 'Username is required')
+    .min(3, 'Username must be at least 3 characters'),
   password: z
     .string()
     .min(1, 'Password is required')
@@ -31,7 +31,7 @@ export const registerSchema = z.object({
   password: z
     .string()
     .min(1, 'Password is required')
-    .min(4, 'Password must be at least 4 characters'),
+    .min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string().min(1, 'Please confirm your password'),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
