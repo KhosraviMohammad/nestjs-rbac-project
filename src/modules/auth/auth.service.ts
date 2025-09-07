@@ -76,7 +76,6 @@ export class AuthService {
             password: registerDto.password,
             firstName: registerDto.firstName,
             lastName: registerDto.lastName,
-            role: 'support',
           },
           tx,
         );
