@@ -63,7 +63,7 @@ const Users: React.FC = () => {
   const [roleChangeUser, setRoleChangeUser] = useState<User | null>(null)
 
   // React Query hooks
-  const { data: users = [], isLoading, error } = useUsers()
+  const { data: usersResponse, isLoading, error } = useUsers()
   const lockUserMutation = useLockUser()
   const unlockUserMutation = useUnlockUser()
   const changeRoleMutation = useChangeUserRole()
@@ -217,7 +217,7 @@ const Users: React.FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {users.map((user: User) => (
+                {(usersResponse?.data ?? []).map((user: User) => (
                   <TableRow key={user.id}>
                     <TableCell>
                       <Box display="flex" alignItems="center">
