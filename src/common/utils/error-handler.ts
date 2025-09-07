@@ -19,12 +19,5 @@ export function handleAppError(error: any): never {
   }
   
   // For other errors, convert to generic HTTP error
-  throw new HttpException(
-    {
-      message: error.message || 'Internal server error',
-      error: 'INTERNAL_SERVER_ERROR',
-      statusCode: 400,
-    },
-    400,
-  );
+  throw error
 }
