@@ -10,6 +10,7 @@ import {
   createInvalidVerificationTokenError,
   createEmailAlreadyVerifiedError,
   createEmailExistsAuthError,
+  createEmailSendFailedError,
 } from '../../common/errors/app-errors';
 import { RegisterDto } from './dto/register.dto';
 
@@ -18,7 +19,7 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   async validateUser(username: string, password: string): Promise<any> {
     const user = await this.usersService.findByUsername(username);
@@ -35,7 +36,7 @@ export class AuthService {
 
   async login(loginDto: LoginDto) {
     const user = await this.validateUser(loginDto.username, loginDto.password);
-    
+
     if (!user) {
       throw createInvalidCredentialsError();
     }
@@ -59,31 +60,33 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto) {
-    // Check if user already exists by email field
-    const existingUser = await this.usersService.findByEmail(registerDto.email);
-    if (existingUser) {
-      throw createEmailExistsAuthError();
-    }
-
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
-    const user = await this.usersService.create({
-      email: registerDto.email,
-      username: registerDto.email, // Store email in username field
-      password: hashedPassword,
-      firstName: registerDto.firstName,
-      lastName: registerDto.lastName,
-    });
 
-    // Send email verification
-      try {
-          await this.sendEmailVerification(user.email, user.id);
+    try {
+      const result = await this.usersService.prisma.$transaction(async (tx) => {
+        const user = await this.usersService.create(
+          {
+            email: registerDto.email,
+            username: registerDto.email,
+            password: hashedPassword,
+            firstName: registerDto.firstName,
+            lastName: registerDto.lastName,
+            role: 'support',
+          },
+          tx,
+        );
 
-      } catch (error) {
-          console.log(error);
-      }
+        // Send email verification within transaction
+        await this.sendEmailVerification(user.email, user.id);
 
-    const { password, ...result } = user;
-    return result;
+        return user;
+      });
+
+      const { password, ...userResult } = result;
+      return userResult;
+    } catch (error) {
+      throw error;
+    }
   }
 
   private getTransporter() {
@@ -100,7 +103,7 @@ export class AuthService {
 
   async sendEmailVerification(email: string, userId: number) {
     const transporter = this.getTransporter();
-    
+
     // Create JWT token for email verification
     const verificationToken = this.jwtService.sign(
       { userId, email, type: 'email_verification' },
@@ -138,14 +141,14 @@ export class AuthService {
       console.log(`Verification email sent to ${email}`);
     } catch (error) {
       console.error('Error sending verification email:', error);
-      throw new Error('Failed to send verification email');
+      throw createEmailSendFailedError();
     }
   }
 
   async verifyEmail(token: string) {
     try {
       const payload = this.jwtService.verify(token);
-      
+
       if (payload.type !== 'email_verification') {
         throw createInvalidVerificationTokenError();
       }

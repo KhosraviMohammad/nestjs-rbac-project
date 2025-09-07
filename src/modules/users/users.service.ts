@@ -16,12 +16,12 @@ import {
 @Injectable()
 export class UsersService {
   constructor(
-    private prisma: MainDatabaseService,
+    public readonly prisma: MainDatabaseService,
   ) {}
 
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto, prismaClient: any = this.prisma) {
     // Check if email already exists
-    const existingUserByEmail = await this.prisma.user.findUnique({
+    const existingUserByEmail = await prismaClient.user.findUnique({
       where: { email: createUserDto.email },
     });
 
@@ -30,7 +30,7 @@ export class UsersService {
     }
 
     // Check if username already exists
-    const existingUserByUsername = await this.prisma.user.findUnique({
+    const existingUserByUsername = await prismaClient.user.findUnique({
       where: { username: createUserDto.username },
     });
 
@@ -42,7 +42,7 @@ export class UsersService {
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
     // Create user with roleType
-    const user = await this.prisma.user.create({
+    const user = await prismaClient.user.create({
       data: {
         email: createUserDto.email,
         username: createUserDto.username,

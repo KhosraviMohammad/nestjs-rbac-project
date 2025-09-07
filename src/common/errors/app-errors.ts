@@ -79,3 +79,6 @@ export const createEmailAlreadyVerifiedError = () =>
 
 export const createEmailExistsAuthError = () => 
   new AppError(AppErrorCode.EMAIL_ALREADY_EXISTS, 'User with this email already exists');
+
+export const createEmailSendFailedError = () => 
+  new AppError(AppErrorCode.EMAIL_SEND_FAILED, 'Failed to send verification email');
