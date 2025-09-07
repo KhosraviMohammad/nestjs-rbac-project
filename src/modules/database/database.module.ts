@@ -13,8 +13,6 @@ import { AuditLogInterceptor } from '../../common/interceptors/audit-log.interce
     MongooseModule.forRootAsync({
       useFactory: () => ({
         uri: process.env.MONGODB_URI,
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
       }),
     }),
     MongooseModule.forFeature([
