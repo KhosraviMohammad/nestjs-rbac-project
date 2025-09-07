@@ -19,10 +19,10 @@ import {
   Email as EmailIcon,
   PersonAdd as PersonAddIcon 
 } from '@mui/icons-material'
-import { registerSchema, type RegisterFormData } from '../schemas'
-import { useRegister } from '../hooks'
+import { registerSchema, type RegisterFormData } from '../../schemas'
+import { useRegister } from '../../hooks'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
-import { formatBackendError } from '../utils/errorHandler'
+import { formatBackendError } from '../../utils/errorHandler'
 import { toast } from 'react-toastify'
 
 const Register: React.FC = () => {

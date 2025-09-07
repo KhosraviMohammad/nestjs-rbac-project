@@ -44,8 +44,8 @@ import {
   type ChangeRoleFormData, 
   UserRole, 
   UserStatus 
-} from '../schemas'
-import { useUsers, useLockUser, useUnlockUser, useChangeUserRole } from '../hooks'
+} from '../../schemas'
+import { useUsers, useLockUser, useUnlockUser, useChangeUserRole } from '../../hooks'
 import { toast } from 'react-toastify'
 
 interface User {
@@ -463,7 +463,6 @@ const Users: React.FC = () => {
                       label="Role"
                       error={!!roleForm.formState.errors.role}
                     >
-                      <MenuItem value="user">User</MenuItem>
                       <MenuItem value="support">Support</MenuItem>
                       <MenuItem value="admin">Admin</MenuItem>
                     </Select>
