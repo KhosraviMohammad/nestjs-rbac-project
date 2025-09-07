@@ -14,10 +14,10 @@ import {
   Link,
 } from '@mui/material'
 import { Lock as LockIcon, Person as PersonIcon } from '@mui/icons-material'
-import { loginSchema, type LoginFormData } from '../../schemas'
-import { useLogin } from '../../hooks'
+import { loginSchema, type LoginFormData } from '@/schemas'
+import { useLogin } from '@/hooks'
 import { Link as RouterLink } from 'react-router-dom'
-import { formatBackendError } from '../../utils/errorHandler'
+import { formatBackendError } from '@/utils/errorHandler'
 import { toast } from 'react-toastify'
 
 const Login: React.FC = () => {

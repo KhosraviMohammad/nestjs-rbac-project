@@ -44,8 +44,8 @@ import {
   type ChangeRoleFormData, 
   UserRole, 
   UserStatus 
-} from '../../schemas'
-import { useUsers, useLockUser, useUnlockUser, useChangeUserRole } from '../../hooks'
+} from '@/schemas'
+import { useUsers, useLockUser, useUnlockUser, useChangeUserRole } from '@/hooks'
 import { toast } from 'react-toastify'
 
 interface User {
