@@ -3,13 +3,14 @@ import {
   Get,
   Query,
   UseGuards,
-  ParseIntPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuditLogService } from './audit-log.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
+import { AuditLogQueryDto } from './dto/audit-log-query.dto';
+import { PaginatedAuditLogsDto } from './dto/audit-log-response.dto';
 
 @ApiTags('Admin - Audit Logs')
 @Controller('admin/audit-logs')
@@ -20,16 +21,14 @@ export class AuditLogController {
 
   @Get()
   @Roles('admin', 'support')
-  @ApiOperation({ summary: 'Get audit logs with basic filters (Admin and Support)' })
-  @ApiQuery({ name: 'limit', required: false, description: 'Number of logs to return (default: 50)' })
-  @ApiQuery({ name: 'skip', required: false, description: 'Number of logs to skip (default: 0)' })
-  @ApiResponse({ status: 200, description: 'Audit logs retrieved successfully' })
+  @ApiOperation({ summary: 'Get audit logs with advanced filters (Admin and Support)' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Audit logs retrieved successfully',
+    type: PaginatedAuditLogsDto
+  })
   @ApiResponse({ status: 403, description: 'Forbidden - Admin or Support role required' })
-  async getLogs(
-    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 50,
-    @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
-  ) {
-    // This is a placeholder - you can implement basic audit log retrieval here
-    return { message: 'Audit logs endpoint - implement as needed' };
+  async getAuditLogs(@Query() query: AuditLogQueryDto): Promise<PaginatedAuditLogsDto> {
+    return await this.auditLogService.getAuditLogs(query);
   }
 }
