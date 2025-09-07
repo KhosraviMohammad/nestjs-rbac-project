@@ -62,6 +62,7 @@ export type UpdateUserFormData = z.infer<typeof updateUserSchema>
 
 // Change Role Schema
 export const changeRoleSchema = z.object({
+  roleType: UserRole,
 })
 
 export type ChangeRoleFormData = z.infer<typeof changeRoleSchema>

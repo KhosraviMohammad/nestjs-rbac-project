@@ -1,8 +1,11 @@
 import React, { useState } from 'react'
-import { Box, Typography, Card, CardContent, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Chip, IconButton, Dialog, DialogTitle, DialogContent, Alert, CircularProgress } from '@mui/material'
-import { Add as AddIcon, Edit as EditIcon, Lock as LockIcon, LockOpen as LockOpenIcon } from '@mui/icons-material'
+import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Box, Typography, Card, CardContent, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Chip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Alert, CircularProgress, FormControl, InputLabel, Select, MenuItem } from '@mui/material'
+import { Add as AddIcon, Edit as EditIcon, Person as PersonIcon, Lock as LockIcon, LockOpen as LockOpenIcon } from '@mui/icons-material'
+import { changeRoleSchema, type ChangeRoleFormData, UserRole } from '@/schemas'
 import UserForm from './components/UserForm'
-import { useUsers, useLockUser, useUnlockUser } from '@/hooks'
+import { useUsers, useLockUser, useUnlockUser, useChangeUserRole } from '@/hooks'
 import { toast } from 'react-toastify'
 
 interface User {
@@ -19,11 +22,21 @@ interface User {
 const Users: React.FC = () => {
   const [open, setOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
+  const [roleChangeUser, setRoleChangeUser] = useState<User | null>(null)
 
   // React Query hooks
   const { data: usersResponse, isLoading, error } = useUsers()
   const lockUserMutation = useLockUser()
   const unlockUserMutation = useUnlockUser()
+  const changeRoleMutation = useChangeUserRole()
+
+  // Role change form
+  const roleForm = useForm<ChangeRoleFormData>({
+    resolver: zodResolver(changeRoleSchema),
+    defaultValues: {
+      roleType: 'support',
+    },
+  })
 
   // Form handlers
   const handleUserSubmit = () => {
@@ -40,6 +53,27 @@ const Users: React.FC = () => {
   const handleClose = () => {
     setOpen(false)
     setEditingUser(null)
+  }
+
+  const handleRoleChange = (user: User) => {
+    setRoleChangeUser(user)
+    roleForm.reset({ roleType: (user.roleType || 'support') as UserRole })
+  }
+
+  const handleRoleSubmit = async (data: ChangeRoleFormData) => {
+    if (roleChangeUser) {
+      try {
+        await changeRoleMutation.mutateAsync({
+          id: roleChangeUser.id.toString(),
+          roleType: data.roleType,
+        })
+        toast.success('User role changed successfully!')
+        setRoleChangeUser(null)
+      } catch (error: any) {
+        console.error('Role change failed:', error)
+        toast.error(error?.response?.data?.message || 'Failed to change user role. Please try again.')
+      }
+    }
   }
 
 
@@ -126,7 +160,8 @@ const Users: React.FC = () => {
                   <TableRow key={user.id}>
                     <TableCell>
                       <Box display="flex" alignItems="center">
-                        {user.username || [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email}
+                        <PersonIcon sx={{ mr: 1, color: 'action.active' }} />
+                        {[user.firstName, user.lastName].filter(Boolean).join(' ') || user.username || user.email}
                       </Box>
                     </TableCell>
                     <TableCell>{user.email}</TableCell>
@@ -153,6 +188,14 @@ const Users: React.FC = () => {
                         title="Edit User"
                       >
                         <EditIcon />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleRoleChange(user)}
+                        color="secondary"
+                        title="Change Role"
+                      >
+                        <PersonIcon />
                       </IconButton>
                       {!isActive ? (
                         <IconButton
@@ -197,6 +240,46 @@ const Users: React.FC = () => {
             />
           </Box>
         </DialogContent>
+      </Dialog>
+
+      {/* Role Change Dialog */}
+      <Dialog open={!!roleChangeUser} onClose={() => setRoleChangeUser(null)} maxWidth="sm" fullWidth>
+        <form onSubmit={roleForm.handleSubmit(handleRoleSubmit)}>
+          <DialogTitle>
+            Change Role for {roleChangeUser ? ([roleChangeUser.firstName, roleChangeUser.lastName].filter(Boolean).join(' ') || roleChangeUser.username || roleChangeUser.email) : ''}
+          </DialogTitle>
+          <DialogContent>
+            <Box sx={{ pt: 1 }}>
+              <Controller
+                name="roleType"
+                control={roleForm.control}
+                render={({ field }) => (
+                  <FormControl fullWidth margin="normal">
+                    <InputLabel>Role</InputLabel>
+                    <Select
+                      {...field}
+                      label="Role"
+                      error={!!roleForm.formState.errors.roleType}
+                    >
+                      <MenuItem value="support">Support</MenuItem>
+                      <MenuItem value="admin">Admin</MenuItem>
+                    </Select>
+                  </FormControl>
+                )}
+              />
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setRoleChangeUser(null)}>Cancel</Button>
+            <Button 
+              type="submit" 
+              variant="contained" 
+              disabled={changeRoleMutation.isPending}
+            >
+              {changeRoleMutation.isPending ? <CircularProgress size={20} /> : 'Change Role'}
+            </Button>
+          </DialogActions>
+        </form>
       </Dialog>
 
     </Box>
