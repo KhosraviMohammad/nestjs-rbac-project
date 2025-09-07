@@ -15,6 +15,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { UsersService } from './users.service';
 import { ChangeRoleDto } from './dto/change-role.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { SearchUsersDto } from './dto/search-users.dto';
 import { PaginatedUsersDto } from './dto/paginated-users.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -107,7 +108,7 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'User updated successfully' })
   @ApiResponse({ status: 400, description: 'Bad request - Invalid data or user not found' })
   @ApiResponse({ status: 403, description: 'Forbidden - Admin role required' })
-  async update(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto: any) {
+  async update(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto: UpdateUserDto) {
     try {
       return await this.usersService.update(id, updateUserDto);
     } catch (error) {

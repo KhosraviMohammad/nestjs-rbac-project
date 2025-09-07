@@ -25,9 +25,4 @@ export class CreateUserDto {
   @IsString()
   lastName: string;
 
-  @ApiProperty({ example: 'support', required: false, enum: ['admin', 'support'] })
-  @IsOptional()
-  @IsString()
-  @IsIn(['admin', 'support'], { message: 'Role type must be either "admin" or "support"' })
-  role?: string;
 }

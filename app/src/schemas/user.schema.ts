@@ -20,11 +20,15 @@ export const createUserSchema = z.object({
     .min(1, 'Last name is required')
     .min(2, 'Last name must be at least 2 characters')
     .max(50, 'Last name must be less than 50 characters'),
+  username: z
+    .string()
+    .min(1, 'Username is required')
+    .min(3, 'Username must be at least 3 characters')
+    .max(30, 'Username must be less than 30 characters'),
   email: z
     .string()
     .min(1, 'Email is required')
     .email('Please enter a valid email address'),
-  role: UserRole,
   status: UserStatus,
 })
 
@@ -42,11 +46,15 @@ export const updateUserSchema = z.object({
     .min(1, 'Last name is required')
     .min(2, 'Last name must be at least 2 characters')
     .max(50, 'Last name must be less than 50 characters'),
+  username: z
+    .string()
+    .min(1, 'Username is required')
+    .min(3, 'Username must be at least 3 characters')
+    .max(30, 'Username must be less than 30 characters'),
   email: z
     .string()
     .min(1, 'Email is required')
     .email('Please enter a valid email address'),
-  role: UserRole,
   status: UserStatus,
 })
 
@@ -54,7 +62,6 @@ export type UpdateUserFormData = z.infer<typeof updateUserSchema>
 
 // Change Role Schema
 export const changeRoleSchema = z.object({
-  role: UserRole,
 })
 
 export type ChangeRoleFormData = z.infer<typeof changeRoleSchema>
@@ -64,7 +71,7 @@ export const userQuerySchema = z.object({
   page: z.number().min(1).default(1),
   limit: z.number().min(1).max(100).default(10),
   search: z.string().optional(),
-  role: UserRole.optional(),
+  roleType: UserRole.optional(),
   status: UserStatus.optional(),
 })
 

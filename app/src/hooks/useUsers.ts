@@ -99,8 +99,8 @@ export const useChangeUserRole = () => {
   const queryClient = useQueryClient()
   
   return useMutation({
-    mutationFn: ({ id, role }: { id: string; role: string }) =>
-      usersService.changeUserRole(id, role),
+    mutationFn: ({ id, roleType }: { id: string; roleType: string }) =>
+      usersService.changeUserRole(id, roleType),
     onSuccess: () => {
       // Invalidate and refetch users list
       queryClient.invalidateQueries({ queryKey: userKeys.lists() })

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { MainDatabaseService } from '../database/database.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { SearchUsersDto } from './dto/search-users.dto';
 import { PaginatedUsersDto, PaginationMeta } from './dto/paginated-users.dto';
 import { PasswordUtil } from '../../common/utils/password.util';
@@ -49,7 +50,7 @@ export class UsersService {
         password: hashedPassword,
         firstName: createUserDto.firstName,
         lastName: createUserDto.lastName,
-        roleType: createUserDto.role || 'support', // Use roleType instead of roles
+        roleType: 'support', // Default role for new users
       },
     });
 
@@ -201,9 +202,37 @@ export class UsersService {
     });
   }
 
-  async update(id: number, updateUserDto: any) {
+  async update(id: number, updateUserDto: UpdateUserDto) {
     // Check if user exists
     await this.findById(id);
+
+    // Check if username is being changed and if it already exists
+    if (updateUserDto.username) {
+      const existingUser = await this.prisma.user.findFirst({
+        where: {
+          username: updateUserDto.username,
+          id: { not: id }
+        }
+      });
+      
+      if (existingUser) {
+        throw createUsernameExistsError();
+      }
+    }
+
+    // Check if email is being changed and if it already exists
+    if (updateUserDto.email) {
+      const existingUser = await this.prisma.user.findFirst({
+        where: {
+          email: updateUserDto.email,
+          id: { not: id }
+        }
+      });
+      
+      if (existingUser) {
+        throw createEmailExistsError();
+      }
+    }
 
     // Update user data
     return this.prisma.user.update({
@@ -211,8 +240,8 @@ export class UsersService {
       data: {
         firstName: updateUserDto.firstName,
         lastName: updateUserDto.lastName,
+        username: updateUserDto.username,
         email: updateUserDto.email,
-        roleType: updateUserDto.roleType,
       },
     });
   }

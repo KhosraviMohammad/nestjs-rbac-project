@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { TextField, FormControl, InputLabel, Select, MenuItem, Button, Box, CircularProgress } from '@mui/material'
+import { TextField, Button, Box, CircularProgress } from '@mui/material'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { createUserSchema, updateUserSchema, type CreateUserFormData, type UpdateUserFormData, UserRole, UserStatus } from '@/schemas'
+import { createUserSchema, updateUserSchema, type CreateUserFormData, type UpdateUserFormData, UserStatus } from '@/schemas'
 import { useUser, useCreateUser, useUpdateUser } from '@/hooks'
 import { toast } from 'react-toastify'
 
@@ -15,7 +15,7 @@ type UserFormProps = {
 }
 
 const UserForm: React.FC<UserFormProps> = ({ userId, onSubmit, onCancel, submitLabel = 'Create', isLoading = false }) => {
-  const { data: user, isLoading: isUserLoading } = useUser(userId?.toString() || '')
+  const { data: user } = useUser(userId?.toString() || '')
   const createUserMutation = useCreateUser()
   const updateUserMutation = useUpdateUser()
 
@@ -24,8 +24,8 @@ const UserForm: React.FC<UserFormProps> = ({ userId, onSubmit, onCancel, submitL
     defaultValues: {
       firstName: '',
       lastName: '',
+      username: '',
       email: '',
-      role: 'support',
       status: 'active',
     },
   })
@@ -35,8 +35,8 @@ const UserForm: React.FC<UserFormProps> = ({ userId, onSubmit, onCancel, submitL
       form.reset({
         firstName: user.firstName || '',
         lastName: user.lastName || '',
+        username: user.username || '',
         email: user.email,
-        role: (user.roleType || 'support') as UserRole,
         status: (user.isActive ? 'active' : 'inactive') as UserStatus,
       })
     }
@@ -51,8 +51,8 @@ const UserForm: React.FC<UserFormProps> = ({ userId, onSubmit, onCancel, submitL
           userData: {
             firstName: data.firstName,
             lastName: data.lastName,
+            username: data.username,
             email: data.email,
-            roleType: data.role,
           }
         })
         toast.success('User updated successfully!')
@@ -61,8 +61,8 @@ const UserForm: React.FC<UserFormProps> = ({ userId, onSubmit, onCancel, submitL
         await createUserMutation.mutateAsync({
           firstName: data.firstName,
           lastName: data.lastName,
+          username: data.username,
           email: data.email,
-          roleType: data.role,
           password: 'defaultPassword123', // You might want to add password field
         })
         toast.success('User created successfully!')
@@ -107,6 +107,20 @@ const UserForm: React.FC<UserFormProps> = ({ userId, onSubmit, onCancel, submitL
         )}
       />
       <Controller
+        name="username"
+        control={form.control as any}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            fullWidth
+            label="Username"
+            margin="normal"
+            error={!!(form as any).formState.errors.username}
+            helperText={(form as any).formState.errors.username?.message as string}
+          />
+        )}
+      />
+      <Controller
         name="email"
         control={form.control as any}
         render={({ field }) => (
@@ -119,23 +133,6 @@ const UserForm: React.FC<UserFormProps> = ({ userId, onSubmit, onCancel, submitL
             error={!!(form as any).formState.errors.email}
             helperText={(form as any).formState.errors.email?.message as string}
           />
-        )}
-      />
-      <Controller
-        name="role"
-        control={form.control as any}
-        render={({ field }) => (
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Role</InputLabel>
-            <Select
-              {...field}
-              label="Role"
-              error={!!(form as any).formState.errors.role}
-            >
-              <MenuItem value="support">Support</MenuItem>
-              <MenuItem value="admin">Admin</MenuItem>
-            </Select>
-          </FormControl>
         )}
       />
       
