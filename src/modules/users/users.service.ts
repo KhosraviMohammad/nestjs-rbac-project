@@ -3,7 +3,7 @@ import { MainDatabaseService } from '../database/database.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { SearchUsersDto } from './dto/search-users.dto';
 import { PaginatedUsersDto, PaginationMeta } from './dto/paginated-users.dto';
-import * as bcrypt from 'bcryptjs';
+import { PasswordUtil } from '../../common/utils/password.util';
 import {
   createUserNotFoundError,
   createEmailExistsError,
@@ -39,7 +39,7 @@ export class UsersService {
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const hashedPassword = await PasswordUtil.hashPassword(createUserDto.password);
 
     // Create user with roleType
     const user = await prismaClient.user.create({

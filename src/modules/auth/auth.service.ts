@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
-import * as bcrypt from 'bcryptjs';
+import { PasswordUtil } from '../../common/utils/password.util';
 import * as nodemailer from 'nodemailer';
 import { LoginDto } from './dto/login.dto';
 import {
@@ -23,7 +23,7 @@ export class AuthService {
 
   async validateUser(username: string, password: string): Promise<any> {
     const user = await this.usersService.findByUsername(username);
-    if (user && (await bcrypt.compare(password, user.password))) {
+    if (user && (await PasswordUtil.comparePassword(password, user.password))) {
       // Check if email is verified
       if (!user.emailVerified) {
         throw createEmailNotVerifiedError();
@@ -60,15 +60,13 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto) {
-    const hashedPassword = await bcrypt.hash(registerDto.password, 10);
-
     try {
       const result = await this.usersService.prisma.$transaction(async (tx) => {
         const user = await this.usersService.create(
           {
             email: registerDto.email,
             username: registerDto.email,
-            password: hashedPassword,
+            password: registerDto.password,
             firstName: registerDto.firstName,
             lastName: registerDto.lastName,
             role: 'support',
