@@ -6,6 +6,7 @@ export enum AppErrorCode {
   USERNAME_ALREADY_EXISTS = 'USERNAME_ALREADY_EXISTS',
   USER_ALREADY_LOCKED = 'USER_ALREADY_LOCKED',
   USER_ALREADY_UNLOCKED = 'USER_ALREADY_UNLOCKED',
+  USER_ACCOUNT_INACTIVE = 'USER_ACCOUNT_INACTIVE',
   INVALID_ROLE_TYPE = 'INVALID_ROLE_TYPE',
   
   // Auth errors
@@ -61,6 +62,9 @@ export const createUserAlreadyLockedError = () =>
 
 export const createUserAlreadyUnlockedError = () => 
   new AppError(AppErrorCode.USER_ALREADY_UNLOCKED, 'User is already unlocked');
+
+export const createUserAccountInactiveError = () => 
+  new AppError(AppErrorCode.USER_ACCOUNT_INACTIVE, 'User account is inactive', 403);
 
 export const createInvalidRoleTypeError = () => 
   new AppError(AppErrorCode.INVALID_ROLE_TYPE, 'Invalid role type. Must be "admin" or "support"');

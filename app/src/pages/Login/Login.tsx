@@ -48,7 +48,12 @@ const Login: React.FC = () => {
       // Check if it's an email verification error
       if (errorMessage.includes('verify your email')) {
         toast.error('Please check your email and verify your account before logging in.')
-      } else {
+      } 
+      // Check if it's an inactive account error
+      else if (errorMessage.includes('inactive') || error?.response?.status === 403) {
+        toast.error('Your account is inactive. Please contact an administrator.')
+      } 
+      else {
         toast.error(errorMessage)
       }
     }

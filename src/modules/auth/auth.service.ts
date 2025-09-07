@@ -11,6 +11,7 @@ import {
   createEmailAlreadyVerifiedError,
   createEmailExistsAuthError,
   createEmailSendFailedError,
+  createUserAccountInactiveError,
 } from '../../common/errors/app-errors';
 import { RegisterDto } from './dto/register.dto';
 
@@ -28,6 +29,12 @@ export class AuthService {
       if (!user.emailVerified) {
         throw createEmailNotVerifiedError();
       }
+      
+      // Check if user is active
+      if (!user.isActive) {
+        throw createUserAccountInactiveError();
+      }
+      
       const { password, ...result } = user;
       return result;
     }
