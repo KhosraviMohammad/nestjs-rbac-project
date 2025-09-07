@@ -19,6 +19,7 @@ async function main() {
       firstName: 'Admin',
       lastName: 'User',
       roleType: 'admin',
+      emailVerified: true,
     },
   });
 
@@ -32,6 +33,7 @@ async function main() {
       firstName: 'Support',
       lastName: 'Staff',
       roleType: 'support',
+      emailVerified: true,
     },
   });
 
