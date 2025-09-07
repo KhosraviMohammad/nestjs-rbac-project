@@ -4,19 +4,19 @@ import { Transform, Type } from 'class-transformer';
 
 export class SearchUsersDto {
   @ApiProperty({ 
-    example: 'john', 
+    example: '', 
     required: false, 
-    description: 'Search term for username, email, firstName, or lastName' 
+    description: 'Search term for username, email, firstName, or lastName (leave empty to show all users)' 
   })
   @IsOptional()
   @IsString()
   search?: string;
 
   @ApiProperty({ 
-    example: 'admin', 
+    example: '', 
     required: false, 
     enum: ['admin', 'support'],
-    description: 'Filter by role type' 
+    description: 'Filter by role type (leave empty to show all roles)' 
   })
   @IsOptional()
   @IsString()
@@ -24,9 +24,9 @@ export class SearchUsersDto {
   roleType?: string;
 
   @ApiProperty({ 
-    example: true, 
+    example: '', 
     required: false, 
-    description: 'Filter by active status' 
+    description: 'Filter by active status (leave empty to show all statuses)' 
   })
   @IsOptional()
   @Transform(({ value }) => {
@@ -38,9 +38,9 @@ export class SearchUsersDto {
   isActive?: boolean;
 
   @ApiProperty({ 
-    example: true, 
+    example: '', 
     required: false, 
-    description: 'Filter by email verification status' 
+    description: 'Filter by email verification status (leave empty to show all verification statuses)' 
   })
   @IsOptional()
   @Transform(({ value }) => {
@@ -52,18 +52,18 @@ export class SearchUsersDto {
   emailVerified?: boolean;
 
   @ApiProperty({ 
-    example: '2024-01-01', 
+    example: '', 
     required: false, 
-    description: 'Filter users created after this date (YYYY-MM-DD)' 
+    description: 'Filter users created after this date (YYYY-MM-DD) - leave empty for no start date' 
   })
   @IsOptional()
   @IsString()
   createdAfter?: string;
 
   @ApiProperty({ 
-    example: '2024-12-31', 
+    example: '', 
     required: false, 
-    description: 'Filter users created before this date (YYYY-MM-DD)' 
+    description: 'Filter users created before this date (YYYY-MM-DD) - leave empty for no end date' 
   })
   @IsOptional()
   @IsString()
