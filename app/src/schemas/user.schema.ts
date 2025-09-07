@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
-// User Role Enum
-export const UserRole = z.enum(['admin', 'support', 'user'])
+// User Role Enum (only admin and support)
+export const UserRole = z.enum(['admin', 'support'])
 export type UserRole = z.infer<typeof UserRole>
 
 // User Status Enum
@@ -10,11 +10,16 @@ export type UserStatus = z.infer<typeof UserStatus>
 
 // Create User Schema
 export const createUserSchema = z.object({
-  name: z
+  firstName: z
     .string()
-    .min(1, 'Name is required')
-    .min(2, 'Name must be at least 2 characters')
-    .max(50, 'Name must be less than 50 characters'),
+    .min(1, 'First name is required')
+    .min(2, 'First name must be at least 2 characters')
+    .max(50, 'First name must be less than 50 characters'),
+  lastName: z
+    .string()
+    .min(1, 'Last name is required')
+    .min(2, 'Last name must be at least 2 characters')
+    .max(50, 'Last name must be less than 50 characters'),
   email: z
     .string()
     .min(1, 'Email is required')
@@ -27,11 +32,16 @@ export type CreateUserFormData = z.infer<typeof createUserSchema>
 
 // Update User Schema
 export const updateUserSchema = z.object({
-  name: z
+  firstName: z
     .string()
-    .min(1, 'Name is required')
-    .min(2, 'Name must be at least 2 characters')
-    .max(50, 'Name must be less than 50 characters'),
+    .min(1, 'First name is required')
+    .min(2, 'First name must be at least 2 characters')
+    .max(50, 'First name must be less than 50 characters'),
+  lastName: z
+    .string()
+    .min(1, 'Last name is required')
+    .min(2, 'Last name must be at least 2 characters')
+    .max(50, 'Last name must be less than 50 characters'),
   email: z
     .string()
     .min(1, 'Email is required')

@@ -29,7 +29,8 @@ export const usersService = {
   
   // تغییر نقش کاربر
   changeUserRole: async (id: string, role: string) => {
-    const response = await api.patch(USERS_URLS.CHANGE_ROLE(id), { role })
+    // Backend expects roleType
+    const response = await api.patch(USERS_URLS.CHANGE_ROLE(id), { roleType: role })
     return response.data
   },
 }

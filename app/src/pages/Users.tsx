@@ -50,10 +50,12 @@ import { toast } from 'react-toastify'
 
 interface User {
   id: number
-  name: string
+  username?: string
+  firstName?: string
+  lastName?: string
   email: string
-  role: string
-  status: 'active' | 'inactive' | 'locked'
+  roleType?: string
+  isActive?: boolean
   createdAt: string
 }
 
@@ -72,9 +74,10 @@ const Users: React.FC = () => {
   const createForm = useForm<CreateUserFormData>({
     resolver: zodResolver(createUserSchema),
     defaultValues: {
-      name: '',
+      firstName: '',
+      lastName: '',
       email: '',
-      role: 'user',
+      role: 'support',
       status: 'active',
     },
   })
@@ -82,9 +85,10 @@ const Users: React.FC = () => {
   const updateForm = useForm<UpdateUserFormData>({
     resolver: zodResolver(updateUserSchema),
     defaultValues: {
-      name: '',
+      firstName: '',
+      lastName: '',
       email: '',
-      role: 'user',
+      role: 'support',
       status: 'active',
     },
   })
@@ -92,7 +96,7 @@ const Users: React.FC = () => {
   const roleForm = useForm<ChangeRoleFormData>({
     resolver: zodResolver(changeRoleSchema),
     defaultValues: {
-      role: 'user',
+      role: 'support',
     },
   })
 
@@ -100,10 +104,11 @@ const Users: React.FC = () => {
     if (user) {
       setEditingUser(user)
       updateForm.reset({
-        name: user.name,
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
         email: user.email,
-        role: user.role as UserRole,
-        status: user.status as UserStatus,
+        role: (user.roleType || 'support') as UserRole,
+        status: (user.isActive ? 'active' : 'inactive') as UserStatus,
       })
     } else {
       setEditingUser(null)
@@ -121,7 +126,7 @@ const Users: React.FC = () => {
 
   const handleRoleChange = (user: User) => {
     setRoleChangeUser(user)
-    roleForm.reset({ role: user.role as UserRole })
+    roleForm.reset({ role: (user.roleType || 'support') as UserRole })
   }
 
   const handleRoleSubmit = async (data: ChangeRoleFormData) => {
@@ -217,26 +222,28 @@ const Users: React.FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {(usersResponse?.data ?? []).map((user: User) => (
+                {(usersResponse?.data ?? []).map((user: User) => {
+                  const isActive = user.isActive === true
+                  return (
                   <TableRow key={user.id}>
                     <TableCell>
                       <Box display="flex" alignItems="center">
                         <PersonIcon sx={{ mr: 1, color: 'action.active' }} />
-                        {user.name}
+                        {user.username || [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email}
                       </Box>
                     </TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
                       <Chip
-                        label={user.role}
-                        color={getRoleColor(user.role) as any}
+                        label={(user.roleType || 'support')}
+                        color={getRoleColor((user.roleType || 'support')) as any}
                         size="small"
                       />
                     </TableCell>
                     <TableCell>
                       <Chip
-                        label={user.status}
-                        color={user.status === 'active' ? 'success' : 'default'}
+                        label={isActive ? 'active' : 'inactive'}
+                        color={isActive ? 'success' : 'default'}
                         size="small"
                       />
                     </TableCell>
@@ -258,10 +265,10 @@ const Users: React.FC = () => {
                       >
                         <PersonIcon />
                       </IconButton>
-                      {user.status === 'active' ? (
+                      {!isActive ? (
                         <IconButton
                           size="small"
-                          onClick={() => handleLock(user.id)}
+                          onClick={() => handleUnlock(user.id)}
                           color="warning"
                           title="Lock User"
                         >
@@ -270,7 +277,7 @@ const Users: React.FC = () => {
                       ) : (
                         <IconButton
                           size="small"
-                          onClick={() => handleUnlock(user.id)}
+                          onClick={() => handleLock(user.id)}
                           color="success"
                           title="Unlock User"
                         >
@@ -279,7 +286,7 @@ const Users: React.FC = () => {
                       )}
                     </TableCell>
                   </TableRow>
-                ))}
+                )})}
               </TableBody>
             </Table>
           </TableContainer>
@@ -297,16 +304,30 @@ const Users: React.FC = () => {
               // Update Form
               <form onSubmit={updateForm.handleSubmit(() => {})}>
                 <Controller
-                  name="name"
+                  name="firstName"
                   control={updateForm.control}
                   render={({ field }) => (
                     <TextField
                       {...field}
                       fullWidth
-                      label="Name"
+                      label="First Name"
                       margin="normal"
-                      error={!!updateForm.formState.errors.name}
-                      helperText={updateForm.formState.errors.name?.message}
+                      error={!!updateForm.formState.errors.firstName}
+                      helperText={updateForm.formState.errors.firstName?.message}
+                    />
+                  )}
+                />
+                <Controller
+                  name="lastName"
+                  control={updateForm.control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      label="Last Name"
+                      margin="normal"
+                      error={!!updateForm.formState.errors.lastName}
+                      helperText={updateForm.formState.errors.lastName?.message}
                     />
                   )}
                 />
@@ -336,46 +357,42 @@ const Users: React.FC = () => {
                         label="Role"
                         error={!!updateForm.formState.errors.role}
                       >
-                        <MenuItem value="user">User</MenuItem>
                         <MenuItem value="support">Support</MenuItem>
                         <MenuItem value="admin">Admin</MenuItem>
                       </Select>
                     </FormControl>
                   )}
                 />
-                <Controller
-                  name="status"
-                  control={updateForm.control}
-                  render={({ field }) => (
-                    <FormControl fullWidth margin="normal">
-                      <InputLabel>Status</InputLabel>
-                      <Select
-                        {...field}
-                        label="Status"
-                        error={!!updateForm.formState.errors.status}
-                      >
-                        <MenuItem value="active">Active</MenuItem>
-                        <MenuItem value="inactive">Inactive</MenuItem>
-                        <MenuItem value="locked">Locked</MenuItem>
-                      </Select>
-                    </FormControl>
-                  )}
-                />
+                
               </form>
             ) : (
               // Create Form
               <form onSubmit={createForm.handleSubmit(() => {})}>
                 <Controller
-                  name="name"
+                  name="firstName"
                   control={createForm.control}
                   render={({ field }) => (
                     <TextField
                       {...field}
                       fullWidth
-                      label="Name"
+                      label="First Name"
                       margin="normal"
-                      error={!!createForm.formState.errors.name}
-                      helperText={createForm.formState.errors.name?.message}
+                      error={!!createForm.formState.errors.firstName}
+                      helperText={createForm.formState.errors.firstName?.message}
+                    />
+                  )}
+                />
+                <Controller
+                  name="lastName"
+                  control={createForm.control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      label="Last Name"
+                      margin="normal"
+                      error={!!createForm.formState.errors.lastName}
+                      helperText={createForm.formState.errors.lastName?.message}
                     />
                   )}
                 />
@@ -405,31 +422,13 @@ const Users: React.FC = () => {
                         label="Role"
                         error={!!createForm.formState.errors.role}
                       >
-                        <MenuItem value="user">User</MenuItem>
                         <MenuItem value="support">Support</MenuItem>
                         <MenuItem value="admin">Admin</MenuItem>
                       </Select>
                     </FormControl>
                   )}
                 />
-                <Controller
-                  name="status"
-                  control={createForm.control}
-                  render={({ field }) => (
-                    <FormControl fullWidth margin="normal">
-                      <InputLabel>Status</InputLabel>
-                      <Select
-                        {...field}
-                        label="Status"
-                        error={!!createForm.formState.errors.status}
-                      >
-                        <MenuItem value="active">Active</MenuItem>
-                        <MenuItem value="inactive">Inactive</MenuItem>
-                        <MenuItem value="locked">Locked</MenuItem>
-                      </Select>
-                    </FormControl>
-                  )}
-                />
+                
               </form>
             )}
           </Box>
@@ -449,7 +448,7 @@ const Users: React.FC = () => {
       <Dialog open={!!roleChangeUser} onClose={() => setRoleChangeUser(null)} maxWidth="sm" fullWidth>
         <form onSubmit={roleForm.handleSubmit(handleRoleSubmit)}>
           <DialogTitle>
-            Change Role for {roleChangeUser?.name}
+            Change Role for {roleChangeUser ? (roleChangeUser.username || [roleChangeUser.firstName, roleChangeUser.lastName].filter(Boolean).join(' ') || roleChangeUser.email) : ''}
           </DialogTitle>
           <DialogContent>
             <Box sx={{ pt: 1 }}>
