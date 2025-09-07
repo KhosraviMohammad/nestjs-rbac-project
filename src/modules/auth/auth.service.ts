@@ -75,7 +75,12 @@ export class AuthService {
     });
 
     // Send email verification
-    await this.sendEmailVerification(user.email, user.id);
+      try {
+          await this.sendEmailVerification(user.email, user.id);
+
+      } catch (error) {
+          console.log(error);
+      }
 
     const { password, ...result } = user;
     return result;
