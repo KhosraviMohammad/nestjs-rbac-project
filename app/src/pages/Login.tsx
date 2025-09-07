@@ -43,7 +43,14 @@ const Login: React.FC = () => {
       console.log('Login successful!')
     } catch (error: any) {
       console.error('Login failed:', error)
-      toast.error(error?.response?.data?.message || 'Login failed. Please try again.')
+      const errorMessage = error?.response?.data?.message || 'Login failed. Please try again.'
+      
+      // Check if it's an email verification error
+      if (errorMessage.includes('verify your email')) {
+        toast.error('Please check your email and verify your account before logging in.')
+      } else {
+        toast.error(errorMessage)
+      }
     }
   }
 
@@ -148,6 +155,14 @@ const Login: React.FC = () => {
                   Sign up here
                 </Link>
               </Typography>
+              <Box sx={{ mt: 2, p: 2, bgcolor: 'info.light', borderRadius: 1 }}>
+                <Typography variant="body2" color="info.contrastText" sx={{ fontWeight: 'bold' }}>
+                  📧 Email Verification Required
+                </Typography>
+                <Typography variant="body2" color="info.contrastText" sx={{ mt: 0.5 }}>
+                  Please check your email and verify your account before logging in.
+                </Typography>
+              </Box>
               <Box sx={{ mt: 2 }}>
                 <Typography variant="body2" color="text.secondary">
                   Demo Credentials:
