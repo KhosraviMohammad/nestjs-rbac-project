@@ -27,6 +27,18 @@ export const usersService = {
     return response.data
   },
   
+  // ایجاد کاربر جدید
+  createUser: async (userData: any) => {
+    const response = await api.post(USERS_URLS.LIST, userData)
+    return response.data
+  },
+  
+  // به‌روزرسانی کاربر
+  updateUser: async (id: string, userData: any) => {
+    const response = await api.patch(USERS_URLS.BY_ID(id), userData)
+    return response.data
+  },
+  
   // تغییر نقش کاربر
   changeUserRole: async (id: string, role: string) => {
     // Backend expects roleType

@@ -3,7 +3,8 @@ import { Controller, useForm } from 'react-hook-form'
 import { TextField, FormControl, InputLabel, Select, MenuItem, Button, Box, CircularProgress } from '@mui/material'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createUserSchema, updateUserSchema, type CreateUserFormData, type UpdateUserFormData, UserRole, UserStatus } from '@/schemas'
-import { useUser } from '@/hooks'
+import { useUser, useCreateUser, useUpdateUser } from '@/hooks'
+import { toast } from 'react-toastify'
 
 type UserFormProps = {
   userId?: number
@@ -15,6 +16,8 @@ type UserFormProps = {
 
 const UserForm: React.FC<UserFormProps> = ({ userId, onSubmit, onCancel, submitLabel = 'Create', isLoading = false }) => {
   const { data: user, isLoading: isUserLoading } = useUser(userId?.toString() || '')
+  const createUserMutation = useCreateUser()
+  const updateUserMutation = useUpdateUser()
 
   const form = useForm<CreateUserFormData | UpdateUserFormData>({
     resolver: zodResolver(userId ? updateUserSchema : createUserSchema),
@@ -39,11 +42,39 @@ const UserForm: React.FC<UserFormProps> = ({ userId, onSubmit, onCancel, submitL
     }
   }, [user, form])
 
-  const handleSubmit = (data: CreateUserFormData | UpdateUserFormData) => {
-    onSubmit(data)
+  const handleSubmit = async (data: CreateUserFormData | UpdateUserFormData) => {
+    try {
+      if (userId) {
+        // Update user
+        await updateUserMutation.mutateAsync({
+          id: userId.toString(),
+          userData: {
+            firstName: data.firstName,
+            lastName: data.lastName,
+            email: data.email,
+            roleType: data.role,
+          }
+        })
+        toast.success('User updated successfully!')
+      } else {
+        // Create user
+        await createUserMutation.mutateAsync({
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          roleType: data.role,
+          password: 'defaultPassword123', // You might want to add password field
+        })
+        toast.success('User created successfully!')
+      }
+      onSubmit(data)
+    } catch (error: any) {
+      console.error('User operation failed:', error)
+      toast.error(error?.response?.data?.message || 'Operation failed. Please try again.')
+    }
   }
 
-  const isSubmitting = form.formState.isSubmitting || isLoading
+  const isSubmitting = form.formState.isSubmitting || createUserMutation.isPending || updateUserMutation.isPending || isLoading
 
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)}>

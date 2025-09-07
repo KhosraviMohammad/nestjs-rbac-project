@@ -31,22 +31,9 @@ const Users: React.FC = () => {
   const changeRoleMutation = useChangeUserRole()
 
   // Form handlers
-  const handleUserSubmit = async (data: any) => {
-    try {
-      if (editingUser) {
-        // Update user logic here
-        console.log('Updating user:', data)
-        toast.success('User updated successfully!')
-      } else {
-        // Create user logic here
-        console.log('Creating user:', data)
-        toast.success('User created successfully!')
-      }
-      handleClose()
-    } catch (error: any) {
-      console.error('User operation failed:', error)
-      toast.error(error?.response?.data?.message || 'Operation failed. Please try again.')
-    }
+  const handleUserSubmit = () => {
+    // Form submission is now handled by UserForm component
+    handleClose()
   }
 
   const roleForm = useForm<ChangeRoleFormData>({

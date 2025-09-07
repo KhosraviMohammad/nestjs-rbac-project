@@ -60,6 +60,40 @@ export const useUnlockUser = () => {
   })
 }
 
+// Create User Mutation
+export const useCreateUser = () => {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: (userData: any) => usersService.createUser(userData),
+    onSuccess: () => {
+      // Invalidate and refetch users list
+      queryClient.invalidateQueries({ queryKey: userKeys.lists() })
+    },
+    onError: (error) => {
+      console.error('Create user failed:', error)
+    },
+  })
+}
+
+// Update User Mutation
+export const useUpdateUser = () => {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: ({ id, userData }: { id: string; userData: any }) => 
+      usersService.updateUser(id, userData),
+    onSuccess: (_, { id }) => {
+      // Invalidate and refetch users list and specific user detail
+      queryClient.invalidateQueries({ queryKey: userKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: userKeys.detail(id) })
+    },
+    onError: (error) => {
+      console.error('Update user failed:', error)
+    },
+  })
+}
+
 // Change User Role Mutation
 export const useChangeUserRole = () => {
   const queryClient = useQueryClient()

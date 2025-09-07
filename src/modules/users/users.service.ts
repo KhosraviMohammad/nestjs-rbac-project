@@ -201,6 +201,22 @@ export class UsersService {
     });
   }
 
+  async update(id: number, updateUserDto: any) {
+    // Check if user exists
+    await this.findById(id);
+
+    // Update user data
+    return this.prisma.user.update({
+      where: { id },
+      data: {
+        firstName: updateUserDto.firstName,
+        lastName: updateUserDto.lastName,
+        email: updateUserDto.email,
+        roleType: updateUserDto.roleType,
+      },
+    });
+  }
+
   async changeUserRole(userId: number, roleType: string) {
     // Validate role type
     if (!['admin', 'support'].includes(roleType)) {

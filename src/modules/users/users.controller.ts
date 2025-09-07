@@ -100,6 +100,21 @@ export class UsersController {
     }
   }
 
+  @Patch(':id')
+  @Audit('update_user')
+  @Roles('admin')
+  @ApiOperation({ summary: 'Update user by ID (Admin only)' })
+  @ApiResponse({ status: 200, description: 'User updated successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request - Invalid data or user not found' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin role required' })
+  async update(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto: any) {
+    try {
+      return await this.usersService.update(id, updateUserDto);
+    } catch (error) {
+      handleAppError(error);
+    }
+  }
+
   @Post(':id/lock')
   @Audit('lock_user')
   @Roles('admin', 'support')
