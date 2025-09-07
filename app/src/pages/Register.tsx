@@ -21,12 +21,13 @@ import {
 } from '@mui/icons-material'
 import { registerSchema, type RegisterFormData } from '../schemas'
 import { useRegister } from '../hooks'
-import { Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import { formatBackendError } from '../utils/errorHandler'
 import { toast } from 'react-toastify'
 
 const Register: React.FC = () => {
   const registerMutation = useRegister()
+  const navigate = useNavigate()
 
   const {
     control,
@@ -47,8 +48,8 @@ const Register: React.FC = () => {
     try {
       await registerMutation.mutateAsync(data)
       toast.success('Registration successful! Please check your email for verification.')
-      // Redirect or show success message
-      console.log('Registration successful!')
+      // Navigate to login page after successful registration
+      navigate('/login')
     } catch (error: any) {
       console.error('Registration failed:', error)
       toast.error(error?.response?.data?.message || 'Registration failed. Please try again.')
