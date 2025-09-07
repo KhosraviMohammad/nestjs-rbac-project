@@ -5,6 +5,7 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { Audit } from '../../common/decorators/audit.decorator';
+import { handleAppError } from '../../common/utils/error-handler';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -17,18 +18,26 @@ export class AuthController {
   @Audit('user_login')
   @ApiOperation({ summary: 'User login' })
   @ApiResponse({ status: 200, description: 'Login successful' })
-  @ApiResponse({ status: 400, description: 'wrong username or password' })
+  @ApiResponse({ status: 400, description: 'Bad request - Invalid credentials or email not verified' })
   async login(@Body() loginDto: LoginDto, @Request() req) {
-    return this.authService.login(loginDto);
+    try {
+      return await this.authService.login(loginDto);
+    } catch (error) {
+      handleAppError(error);
+    }
   }
 
   @Post('register')
   @Audit('user_registration')
   @ApiOperation({ summary: 'User registration' })
   @ApiResponse({ status: 201, description: 'User registered successfully' })
-  @ApiResponse({ status: 400, description: 'User with this email already exists' })
+  @ApiResponse({ status: 400, description: 'Bad request - User with this email already exists' })
   async register(@Body() registerDto: RegisterDto, @Request() req) {
-    return this.authService.register(registerDto);
+    try {
+      return await this.authService.register(registerDto);
+    } catch (error) {
+      handleAppError(error);
+    }
   }
 
   
@@ -46,11 +55,15 @@ export class AuthController {
   @Audit('email_verification')
   @ApiOperation({ summary: 'Verify email with JWT token' })
   @ApiResponse({ status: 200, description: 'Email verified successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid or expired token' })
+  @ApiResponse({ status: 400, description: 'Bad request - Invalid or expired token' })
   async verifyEmail(@Query('token') token: string) {
     if (!token) {
       throw new BadRequestException('Verification token is required');
     }
-    return this.authService.verifyEmail(token);
+    try {
+      return await this.authService.verifyEmail(token);
+    } catch (error) {
+      handleAppError(error);
+    }
   }
 }

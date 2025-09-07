@@ -23,6 +23,7 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { Audit } from '../../common/decorators/audit.decorator';
 import { CsvExportService } from './csv-export.service';
 import { Response } from 'express';
+import { handleAppError } from '../../common/utils/error-handler';
 
 @ApiTags('Admin - Users')
 @Controller('admin/users')
@@ -74,11 +75,14 @@ export class UsersController {
   @Roles('admin')
   @ApiOperation({ summary: 'Create a new user (Admin only)' })
   @ApiResponse({ status: 201, description: 'User created successfully' })
-  @ApiResponse({ status: 400, description: 'Bad request - Invalid data' })
-  @ApiResponse({ status: 409, description: 'Conflict - Email or username already exists' })
+  @ApiResponse({ status: 400, description: 'Bad request - Invalid data or conflict' })
   @ApiResponse({ status: 403, description: 'Forbidden - Admin role required' })
   async create(@Body() createUserDto: CreateUserDto, @Request() req) {
-    return this.usersService.create(createUserDto);
+    try {
+      return await this.usersService.create(createUserDto);
+    } catch (error) {
+      handleAppError(error);
+    }
   }
 
   @Post(':id/lock')
@@ -86,10 +90,14 @@ export class UsersController {
   @Roles('admin', 'support')
   @ApiOperation({ summary: 'Lock user account (Admin and Support)' })
   @ApiResponse({ status: 200, description: 'User account locked successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request - User not found or already locked' })
   @ApiResponse({ status: 403, description: 'Forbidden - Admin or Support role required' })
-  @ApiResponse({ status: 404, description: 'User not found' })
   async lockUser(@Param('id', ParseIntPipe) id: number, @Request() req) {
-    return this.usersService.lockUser(id);
+    try {
+      return await this.usersService.lockUser(id);
+    } catch (error) {
+      handleAppError(error);
+    }
   }
 
   @Post(':id/unlock')
@@ -97,10 +105,14 @@ export class UsersController {
   @Roles('admin', 'support')
   @ApiOperation({ summary: 'Unlock user account (Admin and Support)' })
   @ApiResponse({ status: 200, description: 'User account unlocked successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request - User not found or already unlocked' })
   @ApiResponse({ status: 403, description: 'Forbidden - Admin or Support role required' })
-  @ApiResponse({ status: 404, description: 'User not found' })
-  unlockUser(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.unlockUser(id);
+  async unlockUser(@Param('id', ParseIntPipe) id: number) {
+    try {
+      return await this.usersService.unlockUser(id);
+    } catch (error) {
+      handleAppError(error);
+    }
   }
 
   @Patch(':id/role')
@@ -108,13 +120,17 @@ export class UsersController {
   @Roles('admin')
   @ApiOperation({ summary: 'Change user role (Admin only)' })
   @ApiResponse({ status: 200, description: 'User role changed successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request - User not found or invalid role type' })
   @ApiResponse({ status: 403, description: 'Forbidden - Admin role required' })
-  @ApiResponse({ status: 404, description: 'User not found' })
   async changeUserRole(
     @Param('id', ParseIntPipe) id: number,
     @Body() changeRoleDto: ChangeRoleDto,
     @Request() req,
   ) {
-    return this.usersService.changeUserRole(id, changeRoleDto.roleType);
+    try {
+      return await this.usersService.changeUserRole(id, changeRoleDto.roleType);
+    } catch (error) {
+      handleAppError(error);
+    }
   }
 }

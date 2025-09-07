@@ -1,9 +1,17 @@
-import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { MainDatabaseService } from '../database/database.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { SearchUsersDto } from './dto/search-users.dto';
 import { PaginatedUsersDto, PaginationMeta } from './dto/paginated-users.dto';
 import * as bcrypt from 'bcryptjs';
+import {
+  createUserNotFoundError,
+  createEmailExistsError,
+  createUsernameExistsError,
+  createUserAlreadyLockedError,
+  createUserAlreadyUnlockedError,
+  createInvalidRoleTypeError,
+} from '../../common/errors/app-errors';
 
 @Injectable()
 export class UsersService {
@@ -18,7 +26,7 @@ export class UsersService {
     });
 
     if (existingUserByEmail) {
-      throw new ConflictException('Email already exists');
+      throw createEmailExistsError();
     }
 
     // Check if username already exists
@@ -27,7 +35,7 @@ export class UsersService {
     });
 
     if (existingUserByUsername) {
-      throw new ConflictException('Username already exists');
+      throw createUsernameExistsError();
     }
 
     // Hash password
@@ -135,7 +143,7 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+      throw createUserNotFoundError(id);
     }
 
     return user;
@@ -167,7 +175,7 @@ export class UsersService {
     const user = await this.findById(id);
     
     if (!user.isActive) {
-      throw new BadRequestException('User is already locked');
+      throw createUserAlreadyLockedError();
     }
 
     return this.prisma.user.update({
@@ -182,7 +190,7 @@ export class UsersService {
     const user = await this.findById(id);
     
     if (user.isActive) {
-      throw new BadRequestException('User is already unlocked');
+      throw createUserAlreadyUnlockedError();
     }
 
     return this.prisma.user.update({
@@ -196,7 +204,7 @@ export class UsersService {
   async changeUserRole(userId: number, roleType: string) {
     // Validate role type
     if (!['admin', 'support'].includes(roleType)) {
-      throw new BadRequestException('Invalid role type. Must be "admin" or "support"');
+      throw createInvalidRoleTypeError();
     }
 
     // Check if user exists

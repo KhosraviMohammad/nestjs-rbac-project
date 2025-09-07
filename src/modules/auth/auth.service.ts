@@ -1,9 +1,16 @@
-import { Injectable, UnauthorizedException, ConflictException, BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcryptjs';
 import * as nodemailer from 'nodemailer';
 import { LoginDto } from './dto/login.dto';
+import {
+  createInvalidCredentialsError,
+  createEmailNotVerifiedError,
+  createInvalidVerificationTokenError,
+  createEmailAlreadyVerifiedError,
+  createEmailExistsAuthError,
+} from '../../common/errors/app-errors';
 import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
@@ -16,6 +23,10 @@ export class AuthService {
   async validateUser(username: string, password: string): Promise<any> {
     const user = await this.usersService.findByUsername(username);
     if (user && (await bcrypt.compare(password, user.password))) {
+      // Check if email is verified
+      if (!user.emailVerified) {
+        throw createEmailNotVerifiedError();
+      }
       const { password, ...result } = user;
       return result;
     }
@@ -24,8 +35,9 @@ export class AuthService {
 
   async login(loginDto: LoginDto) {
     const user = await this.validateUser(loginDto.username, loginDto.password);
+    
     if (!user) {
-      throw new BadRequestException('wrong username or password');
+      throw createInvalidCredentialsError();
     }
 
     const payload = {
@@ -50,7 +62,7 @@ export class AuthService {
     // Check if user already exists by email field
     const existingUser = await this.usersService.findByEmail(registerDto.email);
     if (existingUser) {
-      throw new BadRequestException('User with this email already exists');
+      throw createEmailExistsAuthError();
     }
 
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
@@ -130,16 +142,13 @@ export class AuthService {
       const payload = this.jwtService.verify(token);
       
       if (payload.type !== 'email_verification') {
-        throw new BadRequestException('Invalid verification token');
+        throw createInvalidVerificationTokenError();
       }
 
       const user = await this.usersService.findById(payload.userId);
-      if (!user) {
-        throw new BadRequestException('User not found');
-      }
 
       if (user.emailVerified) {
-        throw new BadRequestException('Email already verified');
+        throw createEmailAlreadyVerifiedError();
       }
 
       // Update user verification status
@@ -157,7 +166,7 @@ export class AuthService {
       };
     } catch (error) {
       if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
-        throw new BadRequestException('Invalid or expired verification token');
+        throw createInvalidVerificationTokenError();
       }
       throw error;
     }
