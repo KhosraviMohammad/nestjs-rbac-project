@@ -1,50 +1,10 @@
 import React, { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Chip,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Alert,
-  CircularProgress,
-} from '@mui/material'
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Person as PersonIcon,
-  Lock as LockIcon,
-  LockOpen as LockOpenIcon,
-} from '@mui/icons-material'
-import { 
-  createUserSchema, 
-  updateUserSchema, 
-  changeRoleSchema, 
-  type CreateUserFormData, 
-  type UpdateUserFormData, 
-  type ChangeRoleFormData, 
-  UserRole, 
-  UserStatus 
-} from '@/schemas'
+import { Box, Typography, Card, CardContent, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Chip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Alert, CircularProgress, FormControl, InputLabel, Select, MenuItem } from '@mui/material'
+import { Add as AddIcon, Edit as EditIcon, Person as PersonIcon, Lock as LockIcon, LockOpen as LockOpenIcon } from '@mui/icons-material'
+import { changeRoleSchema, type ChangeRoleFormData, UserRole } from '@/schemas'
+import UserForm from './components/UserForm'
 import { useUsers, useLockUser, useUnlockUser, useChangeUserRole } from '@/hooks'
 import { toast } from 'react-toastify'
 
@@ -70,28 +30,24 @@ const Users: React.FC = () => {
   const unlockUserMutation = useUnlockUser()
   const changeRoleMutation = useChangeUserRole()
 
-  // Forms
-  const createForm = useForm<CreateUserFormData>({
-    resolver: zodResolver(createUserSchema),
-    defaultValues: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      role: 'support',
-      status: 'active',
-    },
-  })
-
-  const updateForm = useForm<UpdateUserFormData>({
-    resolver: zodResolver(updateUserSchema),
-    defaultValues: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      role: 'support',
-      status: 'active',
-    },
-  })
+  // Form handlers
+  const handleUserSubmit = async (data: any) => {
+    try {
+      if (editingUser) {
+        // Update user logic here
+        console.log('Updating user:', data)
+        toast.success('User updated successfully!')
+      } else {
+        // Create user logic here
+        console.log('Creating user:', data)
+        toast.success('User created successfully!')
+      }
+      handleClose()
+    } catch (error: any) {
+      console.error('User operation failed:', error)
+      toast.error(error?.response?.data?.message || 'Operation failed. Please try again.')
+    }
+  }
 
   const roleForm = useForm<ChangeRoleFormData>({
     resolver: zodResolver(changeRoleSchema),
@@ -101,27 +57,13 @@ const Users: React.FC = () => {
   })
 
   const handleOpen = (user?: User) => {
-    if (user) {
-      setEditingUser(user)
-      updateForm.reset({
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
-        email: user.email,
-        role: (user.roleType || 'support') as UserRole,
-        status: (user.isActive ? 'active' : 'inactive') as UserStatus,
-      })
-    } else {
-      setEditingUser(null)
-      createForm.reset()
-    }
+    setEditingUser(user || null)
     setOpen(true)
   }
 
   const handleClose = () => {
     setOpen(false)
     setEditingUser(null)
-    createForm.reset()
-    updateForm.reset()
   }
 
   const handleRoleChange = (user: User) => {
@@ -300,148 +242,14 @@ const Users: React.FC = () => {
         </DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 1 }}>
-            {editingUser ? (
-              // Update Form
-              <form onSubmit={updateForm.handleSubmit(() => {})}>
-                <Controller
-                  name="firstName"
-                  control={updateForm.control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label="First Name"
-                      margin="normal"
-                      error={!!updateForm.formState.errors.firstName}
-                      helperText={updateForm.formState.errors.firstName?.message}
-                    />
-                  )}
-                />
-                <Controller
-                  name="lastName"
-                  control={updateForm.control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label="Last Name"
-                      margin="normal"
-                      error={!!updateForm.formState.errors.lastName}
-                      helperText={updateForm.formState.errors.lastName?.message}
-                    />
-                  )}
-                />
-                <Controller
-                  name="email"
-                  control={updateForm.control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label="Email"
-                      type="email"
-                      margin="normal"
-                      error={!!updateForm.formState.errors.email}
-                      helperText={updateForm.formState.errors.email?.message}
-                    />
-                  )}
-                />
-                <Controller
-                  name="role"
-                  control={updateForm.control}
-                  render={({ field }) => (
-                    <FormControl fullWidth margin="normal">
-                      <InputLabel>Role</InputLabel>
-                      <Select
-                        {...field}
-                        label="Role"
-                        error={!!updateForm.formState.errors.role}
-                      >
-                        <MenuItem value="support">Support</MenuItem>
-                        <MenuItem value="admin">Admin</MenuItem>
-                      </Select>
-                    </FormControl>
-                  )}
-                />
-                
-              </form>
-            ) : (
-              // Create Form
-              <form onSubmit={createForm.handleSubmit(() => {})}>
-                <Controller
-                  name="firstName"
-                  control={createForm.control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label="First Name"
-                      margin="normal"
-                      error={!!createForm.formState.errors.firstName}
-                      helperText={createForm.formState.errors.firstName?.message}
-                    />
-                  )}
-                />
-                <Controller
-                  name="lastName"
-                  control={createForm.control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label="Last Name"
-                      margin="normal"
-                      error={!!createForm.formState.errors.lastName}
-                      helperText={createForm.formState.errors.lastName?.message}
-                    />
-                  )}
-                />
-                <Controller
-                  name="email"
-                  control={createForm.control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label="Email"
-                      type="email"
-                      margin="normal"
-                      error={!!createForm.formState.errors.email}
-                      helperText={createForm.formState.errors.email?.message}
-                    />
-                  )}
-                />
-                <Controller
-                  name="role"
-                  control={createForm.control}
-                  render={({ field }) => (
-                    <FormControl fullWidth margin="normal">
-                      <InputLabel>Role</InputLabel>
-                      <Select
-                        {...field}
-                        label="Role"
-                        error={!!createForm.formState.errors.role}
-                      >
-                        <MenuItem value="support">Support</MenuItem>
-                        <MenuItem value="admin">Admin</MenuItem>
-                      </Select>
-                    </FormControl>
-                  )}
-                />
-                
-              </form>
-            )}
+            <UserForm
+              userId={editingUser?.id}
+              onSubmit={handleUserSubmit}
+              onCancel={handleClose}
+              submitLabel={editingUser ? 'Update' : 'Create'}
+            />
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button 
-            onClick={editingUser ? updateForm.handleSubmit(() => {}) : createForm.handleSubmit(() => {})} 
-            variant="contained"
-          >
-            {editingUser ? 'Update' : 'Create'}
-          </Button>
-        </DialogActions>
       </Dialog>
 
       {/* Role Change Dialog */}
