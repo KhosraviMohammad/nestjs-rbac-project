@@ -45,6 +45,21 @@ export class UsersController {
     return this.usersService.findAll(searchParams);
   }
 
+  @Get(':id')
+  @Audit('get_user_detail')
+  @Roles('admin', 'support')
+  @ApiOperation({ summary: 'Get user by ID (Admin and Support)' })
+  @ApiResponse({ status: 200, description: 'User retrieved successfully' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin or Support role required' })
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    try {
+      return await this.usersService.findById(id);
+    } catch (error) {
+      handleAppError(error);
+    }
+  }
+
   @Get('export/csv')
   @Audit('export_users_csv')
   @Roles('admin', 'support')
