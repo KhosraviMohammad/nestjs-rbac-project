@@ -9,7 +9,7 @@
 - مسیربندی با React Router
 
 ### پیش‌نیاز
-- Node.js 20+
+- Node.js 20+ (بررسی‌شده با Node.js 22)
 - npm/pnpm/yarn (در مثال‌ها npm)
 
 ### متغیرهای محیطی

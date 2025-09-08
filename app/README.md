@@ -9,7 +9,7 @@ A lightweight frontend for the NestJS RBAC project, built with React 19, Vite 7,
 - **Routing**: React Router
 
 ### Requirements
-- Node.js 20+
+- Node.js 20+ (tested with Node.js 22)
 - pnpm/npm/yarn (examples use npm)
 
 ### Environment variables

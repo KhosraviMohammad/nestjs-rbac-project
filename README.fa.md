@@ -11,7 +11,7 @@
 - فرانت‌اند: React 19 + Vite 7 + MUI + TanStack Query
 
 ## پیش‌نیازها
-- Node.js 18+ و npm
+- Node.js 18+ و npm (بررسی‌شده با Node.js 22)
 - PostgreSQL
 
 ## راه‌اندازی
