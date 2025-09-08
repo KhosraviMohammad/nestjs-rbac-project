@@ -61,6 +61,12 @@ docker run --rm -p 4173:4173 \
 ```
 Then open `http://localhost:4173`.
 
+#### Using root Docker Compose
+If you use the repository's root `docker-compose.yml` (recommended for local), the backend will run migrations and seed automatically before starting. Default admin credentials after seeding:
+
+- username: `admin`
+- password: `admin`
+
 ### Project structure (key folders)
 - `src/pages` – Route pages (e.g., `Login`, `Register`, `Users`)
 - `src/components` – Reusable UI components
@@ -73,6 +79,9 @@ Then open `http://localhost:4173`.
 ### Backend integration
 - Ensure the NestJS backend in the repository root is running (e.g., `npm run start:dev` or via Docker Compose) and reachable via `VITE_API_URL`.
 - Update `src/services/urls.ts` and axios base config (if needed) to point to the correct API base URL.
+
+### Credentials (after seed)
+- Admin: `admin / admin`
 
 ### Troubleshooting
 - 404s from API: verify `VITE_API_URL` and CORS on backend
