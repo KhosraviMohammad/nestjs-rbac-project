@@ -94,14 +94,51 @@ The `seed` service runs `prisma migrate deploy` and then executes `dist/prisma/s
 ```
 src/
 ├── common/
-│   ├── decorators/          # Audit, roles, permissions decorators
-│   └── guards/              # Roles/permissions guards
+│   ├── decorators/
+│   │   ├── audit.decorator.ts
+│   │   ├── permissions.decorator.ts
+│   │   └── roles.decorator.ts
+│   ├── guards/
+│   │   ├── permissions.guard.ts
+│   │   └── roles.guard.ts
+│   ├── interceptors/
+│   │   └── audit-log.interceptor.ts
+│   ├── errors/
+│   │   ├── app-errors.ts
+│   │   └── index.ts
+│   └── utils/
+│       ├── error-handler.ts
+│       ├── index.ts
+│       └── password.util.ts
 ├── modules/
 │   ├── auth/
-│   ├── users/
+│   │   ├── auth.controller.ts
+│   │   ├── auth.module.ts
+│   │   ├── auth.service.ts
+│   │   ├── dto/
+│   │   ├── guards/
+│   │   └── strategies/
+│   ├── database/
+│   │   ├── audit-log.controller.ts
+│   │   ├── audit-log.service.ts
+│   │   ├── database.module.ts
+│   │   ├── database.service.ts
+│   │   ├── dto/
+│   │   ├── mongodb.service.ts
+│   │   └── schemas/
 │   ├── email/
+│   │   ├── email.module.ts
+│   │   └── email.service.ts
 │   ├── reports/
-│   └── database/
+│   │   ├── reports.controller.ts
+│   │   ├── reports.module.ts
+│   │   └── reports.service.ts
+│   └── users/
+│       ├── csv-export.service.ts
+│       ├── dto/
+│       ├── users.controller.ts
+│       ├── users.module.ts
+│       └── users.service.ts
 ├── app.module.ts
 └── main.ts
 ```
