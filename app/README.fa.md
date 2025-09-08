@@ -64,6 +64,8 @@ docker run --rm -p 4173:4173 \
 - نام کاربری: `admin`
 - گذرواژه: `admin`
 
+فرانت‌اند در Docker روی پورت `4173` بالا می‌آید: `http://localhost:4173`.
+
 ### یکپارچه‌سازی با بک‌اند
 - بک‌اند ریشه پروژه را اجرا کنید (مثلاً `npm run start:dev` یا Docker Compose) و `VITE_API_URL` را درست تنظیم کنید.
 - در صورت نیاز `src/services/urls.ts` و پیکربندی پایه axios را به‌روز کنید.

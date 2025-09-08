@@ -67,6 +67,8 @@ If you use the repository's root `docker-compose.yml` (recommended for local), t
 - username: `admin`
 - password: `admin`
 
+Frontend (Docker) will be available at: `http://localhost:4173`.
+
 ### Project structure (key folders)
 - `src/pages` – Route pages (e.g., `Login`, `Register`, `Users`)
 - `src/components` – Reusable UI components
