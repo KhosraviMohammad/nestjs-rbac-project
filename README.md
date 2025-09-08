@@ -11,7 +11,7 @@ A full-stack RBAC system with a NestJS backend and a React (Vite) frontend locat
 - **Frontend**: React 19 + Vite 7 + MUI + TanStack Query
 
 ## Prerequisites
-- Node.js 18+ (tested with Node.js 22)
+- Node.js 22
 - PostgreSQL
 - npm (or yarn/pnpm)
 

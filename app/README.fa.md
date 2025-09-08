@@ -9,7 +9,7 @@
 - مسیربندی با React Router
 
 ### پیش‌نیاز
-- Node.js 20+ (بررسی‌شده با Node.js 22)
+- Node.js 22
 - npm/pnpm/yarn (در مثال‌ها npm)
 
 ### متغیرهای محیطی
@@ -82,4 +82,53 @@ docker run --rm -p 4173:4173 \
 
 # React + TypeScript + Vite
 (بخش راهنمای پیش‌فرض Vite برای مرجع در ادامه آمده است.)
+
+### ساختار پروژه
+```
+app/
+├── public/
+├── index.html
+├── src/
+│   ├── assets/
+│   ├── components/
+│   │   ├── Layout.tsx
+│   │   └── ToastProvider.tsx
+│   ├── hooks/
+│   │   ├── index.ts
+│   │   ├── useAuth.ts
+│   │   └── useUsers.ts
+│   ├── pages/
+│   │   ├── Login/
+│   │   │   └── Login.tsx
+│   │   ├── Register/
+│   │   │   └── Register.tsx
+│   │   └── Users/
+│   │       ├── Users.tsx
+│   │       └── components/
+│   ├── providers/
+│   │   ├── AppProvider.tsx
+│   │   ├── QueryProvider.tsx
+│   │   ├── ThemeProvider.tsx
+│   │   └── index.ts
+│   ├── schemas/
+│   │   ├── auth.schema.ts
+│   │   ├── user.schema.ts
+│   │   └── index.ts
+│   ├── services/
+│   │   ├── api.ts
+│   │   ├── auth.service.ts
+│   │   ├── users.service.ts
+│   │   ├── urls.ts
+│   │   └── index.ts
+│   ├── types/
+│   │   └── index.ts
+│   ├── utils/
+│   │   └── errorHandler.ts
+│   ├── App.tsx
+│   ├── main.tsx
+│   ├── index.css
+│   └── App.css
+├── vite.config.ts
+└── package.json
+```
 

@@ -9,7 +9,7 @@ A lightweight frontend for the NestJS RBAC project, built with React 19, Vite 7,
 - **Routing**: React Router
 
 ### Requirements
-- Node.js 20+ (tested with Node.js 22)
+- Node.js 22
 - pnpm/npm/yarn (examples use npm)
 
 ### Environment variables
@@ -69,14 +69,54 @@ If you use the repository's root `docker-compose.yml` (recommended for local), t
 
 Frontend (Docker) will be available at: `http://localhost:4173`.
 
-### Project structure (key folders)
-- `src/pages` – Route pages (e.g., `Login`, `Register`, `Users`)
-- `src/components` – Reusable UI components
-- `src/hooks` – App-specific hooks (e.g., auth, users)
-- `src/services` – Axios instance, API clients, URL helpers
-- `src/schemas` – Zod validation schemas
-- `src/providers` – App providers (theme, query, etc.)
-- `src/utils` – Utilities (error handling)
+### Project structure
+```
+app/
+├── public/
+├── index.html
+├── src/
+│   ├── assets/
+│   ├── components/
+│   │   ├── Layout.tsx
+│   │   └── ToastProvider.tsx
+│   ├── hooks/
+│   │   ├── index.ts
+│   │   ├── useAuth.ts
+│   │   └── useUsers.ts
+│   ├── pages/
+│   │   ├── Login/
+│   │   │   └── Login.tsx
+│   │   ├── Register/
+│   │   │   └── Register.tsx
+│   │   └── Users/
+│   │       ├── Users.tsx
+│   │       └── components/
+│   ├── providers/
+│   │   ├── AppProvider.tsx
+│   │   ├── QueryProvider.tsx
+│   │   ├── ThemeProvider.tsx
+│   │   └── index.ts
+│   ├── schemas/
+│   │   ├── auth.schema.ts
+│   │   ├── user.schema.ts
+│   │   └── index.ts
+│   ├── services/
+│   │   ├── api.ts
+│   │   ├── auth.service.ts
+│   │   ├── users.service.ts
+│   │   ├── urls.ts
+│   │   └── index.ts
+│   ├── types/
+│   │   └── index.ts
+│   ├── utils/
+│   │   └── errorHandler.ts
+│   ├── App.tsx
+│   ├── main.tsx
+│   ├── index.css
+│   └── App.css
+├── vite.config.ts
+└── package.json
+```
 
 ### Backend integration
 - Ensure the NestJS backend in the repository root is running (e.g., `npm run start:dev` or via Docker Compose) and reachable via `VITE_API_URL`.
