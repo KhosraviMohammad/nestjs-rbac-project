@@ -1,0 +1,34 @@
+# Ignore frontend app entirely
+app/
+
+# Node
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+dist
+coverage
+
+# Environment and local configs
+.env
+.env.*
+*.local
+
+# Editors and OS
+.git
+.gitignore
+.DS_Store
+*.swp
+*.swo
+Thumbs.db
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+
+# Prisma generated files cache (will be copied from deps layer)
+**/.prisma
+
