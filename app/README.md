@@ -1,3 +1,86 @@
+## Frontend App (React + Vite + TypeScript)
+
+A lightweight frontend for the NestJS RBAC project, built with React 19, Vite 7, TypeScript 5, MUI, React Router, React Hook Form, Zod, and TanStack Query.
+
+### Features
+- **Auth**: Login/Register flows with form validation
+- **Data fetching**: Axios + TanStack Query with centralized error handling
+- **UI**: MUI components and theming, toast notifications
+- **Routing**: React Router
+
+### Requirements
+- Node.js 20+
+- pnpm/npm/yarn (examples use npm)
+
+### Environment variables
+Copy `env.example` to `.env` and set values:
+
+```bash
+cp env.example .env
+```
+
+Common variables:
+- `VITE_API_URL` – Base URL of the backend API (e.g. `http://localhost:3000`)
+
+Vite exposes variables prefixed with `VITE_` to the client code.
+
+### Install
+```bash
+npm install
+```
+
+### Scripts
+- `npm run dev` – Start Vite dev server (HMR) on port 5173
+- `npm run build` – Type-check and build a production bundle into `dist/`
+- `npm run preview` – Preview the production build locally on port 4173
+- `npm run start` – Serve `dist/` with `serve` on port 4173 (for simple hosting)
+- `npm run lint` – Run ESLint
+
+### Development
+1) Ensure backend is running and accessible at `VITE_API_URL`.
+2) Start the app:
+```bash
+npm run dev
+```
+App will be available at `http://localhost:5173`.
+
+### Build and preview
+```bash
+npm run build
+npm run preview
+```
+Preview runs at `http://localhost:4173`.
+
+### Docker
+Build a production image and run it:
+```bash
+docker build -t rbac-frontend .
+docker run --rm -p 4173:4173 \
+  -e VITE_API_URL=http://localhost:3000 \
+  rbac-frontend
+```
+Then open `http://localhost:4173`.
+
+### Project structure (key folders)
+- `src/pages` – Route pages (e.g., `Login`, `Register`, `Users`)
+- `src/components` – Reusable UI components
+- `src/hooks` – App-specific hooks (e.g., auth, users)
+- `src/services` – Axios instance, API clients, URL helpers
+- `src/schemas` – Zod validation schemas
+- `src/providers` – App providers (theme, query, etc.)
+- `src/utils` – Utilities (error handling)
+
+### Backend integration
+- Ensure the NestJS backend in the repository root is running (e.g., `npm run start:dev` or via Docker Compose) and reachable via `VITE_API_URL`.
+- Update `src/services/urls.ts` and axios base config (if needed) to point to the correct API base URL.
+
+### Troubleshooting
+- 404s from API: verify `VITE_API_URL` and CORS on backend
+- Empty pages: check network tab and console for errors
+- Env not picked up: restart Vite after changing `.env`
+
+---
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
