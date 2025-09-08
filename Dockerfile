@@ -18,7 +18,7 @@ FROM base AS build
 WORKDIR /usr/src/app
 COPY . .
 COPY --from=deps /usr/src/app/node_modules ./node_modules
-RUN npm run build
+RUN npm run build && npm run build:seed
 
 # --- Production runtime ---
 FROM node:22-alpine AS prod

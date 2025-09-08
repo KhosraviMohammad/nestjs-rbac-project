@@ -1,12 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import * as createCsvWriter from 'csv-writer';
 import { User } from '@prisma/client';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 @Injectable()
 export class CsvExportService {
+  private ensureTempDirExists(): string {
+    const tempDir = path.resolve(process.cwd(), 'temp');
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
+    }
+    return tempDir;
+  }
   async exportUsersToCsv(users: User[]): Promise<Buffer> {
+    const tempDir = this.ensureTempDirExists();
+    const filePath = path.join(tempDir, 'users.csv');
     const csvWriter = createCsvWriter.createObjectCsvWriter({
-      path: 'temp/users.csv',
+      path: filePath,
       header: [
         { id: 'id', title: 'ID' },
         { id: 'email', title: 'Email' },
@@ -40,18 +51,19 @@ export class CsvExportService {
     await csvWriter.writeRecords(csvData);
 
     // Read the generated CSV file and return as Buffer
-    const fs = require('fs');
-    const csvContent = fs.readFileSync('temp/users.csv');
+    const csvContent = fs.readFileSync(filePath);
     
     // Clean up the temporary file
-    fs.unlinkSync('temp/users.csv');
+    fs.unlinkSync(filePath);
     
     return csvContent;
   }
 
   async exportUsersToCsvStream(users: User[]): Promise<string> {
+    const tempDir = this.ensureTempDirExists();
+    const filePath = path.join(tempDir, 'users.csv');
     const csvWriter = createCsvWriter.createObjectCsvWriter({
-      path: 'temp/users.csv',
+      path: filePath,
       header: [
         { id: 'id', title: 'ID' },
         { id: 'email', title: 'Email' },
@@ -85,11 +97,10 @@ export class CsvExportService {
     await csvWriter.writeRecords(csvData);
 
     // Read the generated CSV file and return as string
-    const fs = require('fs');
-    const csvContent = fs.readFileSync('temp/users.csv', 'utf8');
+    const csvContent = fs.readFileSync(filePath, 'utf8');
     
     // Clean up the temporary file
-    fs.unlinkSync('temp/users.csv');
+    fs.unlinkSync(filePath);
     
     return csvContent;
   }
